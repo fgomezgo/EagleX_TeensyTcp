@@ -12,4 +12,18 @@ The microcontroller (Teensy 3.5) works as an interface between the rover's main 
 
 This microcontroller also controls the rover's motor drivers and robotic arm drivers.
 
+How to connect Teensy 3.5 to Ethernet Board ENC28J60 through SPI communication:
+
+| SPI PIN | Teensy 3.5 | ENC28J60 |
+|:-------:|------------|----------|
+| CS      | 10 (CS0)   | 7        |
+| MOSI    | 11 (MOSI0) | 2        |
+| MISO    | 12 (MISO0) | 3        |
+| SCK     | 13 (SCK0)  | 1        |
+| RST     |            | 8        |
+| GND     |            | 9        |
+| 3.3 V   |            | 10       |
+
+
+
 

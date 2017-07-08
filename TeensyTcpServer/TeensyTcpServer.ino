@@ -38,25 +38,6 @@ int client_instr;
 //String to store the message response to the client
 char server_response[100];
 
-/*
-const char page[] PROGMEM =
-"HTTP/1.0 503 Service Unavailable\r\n"
-"Content-Type: text/html\r\n"
-"Retry-After: 600\r\n"
-"\r\n"
-"<html>"
-  "<head><title>"
-    "Service Temporarily Unavailable"
-  "</title></head>"
-  "<body>"
-    "<h3>This service is currently unavailable</h3>"
-    "<p><em>"
-      "The main server is currently off-line.<br />"
-      "Please try again later."
-    "</em></p>"
-  "</body>"
-"</html>"
-;*/
 
 void setup(){
   Serial.begin(57600);
@@ -89,9 +70,9 @@ void loop(){
    uint16_t payloadPos = ether.packetLoop(ether.packetReceive());
  
   if (payloadPos) {
-    Serial.println(payloadPos);
+    //Serial.println(payloadPos);
     char* incomingData = (char *) Ethernet::buffer + payloadPos;
-    Serial.println(incomingData);
+    //Serial.println(incomingData);
     sscanf(incomingData,"%d",&client_instr);
 
 /*  | Device ID | Device Description | Instruction ID |      Instruction Description      |

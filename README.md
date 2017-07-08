@@ -29,6 +29,14 @@ How to connect Teensy 3.5 to Ethernet Board ENC28J60 through SPI communication:
 | GND     |            | 9        |
 | 3.3 V   |            | 10       |
 
+How to connect 10-DOF to Teensy 3.5 to 10-DOF through I2C communication:
+
+| I2C PIN | Teensy 3.5 | 10-DOF |
+|:-------:|:----------:|:------:|
+| SDA     | 18 (SDA0)  | SDA    |
+| SCL     | 19 (SCL0)  | SCL    |
+| GND     |            | GND    |
+| 3.3 V   |            | VIN    |
 
 
 

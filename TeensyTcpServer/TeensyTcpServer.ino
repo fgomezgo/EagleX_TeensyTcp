@@ -31,10 +31,14 @@ static byte gwip[] = { 192,168,1,1 };
 // ethernet mac address - must be unique on your network
 static byte mymac[] = { 0x74,0x69,0x69,0x2D,0x30,0x31 };
 
-byte Ethernet::buffer[500]; // tcp/ip send and receive buffer
+byte Ethernet::buffer[100]; // tcp/ip send and receive buffer
 
-char message[500];
+//Integer to store the number descriptor coming from the client
+int client_instr;
+//String to store the message response to the client
+char server_response[100];
 
+/*
 const char page[] PROGMEM =
 "HTTP/1.0 503 Service Unavailable\r\n"
 "Content-Type: text/html\r\n"
@@ -52,7 +56,7 @@ const char page[] PROGMEM =
     "</em></p>"
   "</body>"
 "</html>"
-;
+;*/
 
 void setup(){
   Serial.begin(57600);
@@ -88,11 +92,41 @@ void loop(){
     Serial.println(payloadPos);
     char* incomingData = (char *) Ethernet::buffer + payloadPos;
     Serial.println(incomingData);
+    sscanf(incomingData,"%d",&client_instr);
 
-    //Intructions are a 4-digit number, where the two first digits from left to write describe the device ID and the last two digits describe the instruction ID
+/*  | Device ID | Device Description | Instruction ID |      Instruction Description      |
+    |:---------:|:------------------:|:--------------:|:---------------------------------:|
+    | 10        | 10-DOF             | 10             | Gyroscope Information (x,y,z)     |
+    |           |                    | 11             | Accelerometer Information (x,y,z) |
+    |           |                    | 12             | Magnetometer Information (x,y,z)  |
+    |           |                    | 13             | Pressure and Temperature          |*/
 
     
-    memcpy_P(ether.tcpOffset(), page, sizeof page);
-    ether.httpServerReply(sizeof page - 1);
+    switch(client_instr/100){
+          case 10: //10-DOF
+          
+              sensors_event_t event;
+              
+             switch(client_instr%100){
+                  case 10:
+                        gyro.getEvent(&event);
+                        sprintf(server_response,"%.6f %.6f %.6f",event.gyro.x,event.gyro.y,event.gyro.z);
+                  break;
+                  case 11:
+                       accel.getEvent(&event);
+                       sprintf(server_response,"%.6f %.6f %.6f",event.acceleration.x,event.acceleration.y,event.acceleration.z); 
+                  break;
+                  case 12:
+                       mag.getEvent(&event);
+                       sprintf(server_response,"%.6f %.6f %.6f",event.magnetic.x,event.magnetic.y,event.magnetic.z);
+                  break;
+              } 
+              memcpy_P(ether.tcpOffset(), server_response, sizeof server_response);
+              ether.httpServerReply(sizeof server_response - 1);
+                       
+          break;
+      
+      }
+
   }
 }

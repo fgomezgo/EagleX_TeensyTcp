@@ -30,9 +30,16 @@ while 1:
 	data_magn = s.recv(BUFFER_SIZE)
 	s.close()
 	
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.connect((TCP_IP, TCP_PORT))
+	s.send('1013')
+	data_bmp = s.recv(BUFFER_SIZE)
+	s.close()
+	
 	print "received response: ",i
 	print "Gyroscope: ",			data_gyro
 	print "Accelerometer: ",	data_accel
 	print "Magnetometer: ",		data_magn
+	print "Pressure & Temperature: ",data_bmp
 	i = i+1
-	time.sleep(0.1)
+	time.sleep(0.07)

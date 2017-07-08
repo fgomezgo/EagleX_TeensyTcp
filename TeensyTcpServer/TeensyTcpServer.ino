@@ -101,7 +101,7 @@ void loop(){
     |           |                    | 12             | Magnetometer Information (x,y,z)  |
     |           |                    | 13             | Pressure and Temperature          |*/
 
-    
+    memset(server_response,0,sizeof server_response);
     switch(client_instr/100){
           case 10: //10-DOF
           
@@ -119,6 +119,12 @@ void loop(){
                   case 12:
                        mag.getEvent(&event);
                        sprintf(server_response,"%.6f %.6f %.6f",event.magnetic.x,event.magnetic.y,event.magnetic.z);
+                  break;
+                  case 13:
+                       bmp.getEvent(&event);
+                       float temperature;
+                       bmp.getTemperature(&temperature);
+                       sprintf(server_response,"%.6f %.6f",event.pressure,temperature);
                   break;
               } 
               memcpy_P(ether.tcpOffset(), server_response, sizeof server_response);

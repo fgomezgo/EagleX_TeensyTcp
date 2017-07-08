@@ -35,4 +35,4 @@ while 1:
 	print "Accelerometer: ",	data_accel
 	print "Magnetometer: ",		data_magn
 	i = i+1
-	time.sleep(1)
+	time.sleep(0.1)

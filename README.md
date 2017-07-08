@@ -8,7 +8,9 @@ The microcontroller (Teensy 3.5) works as an interface between the rover's main 
 
 - Adafruit 10 DOF:
 	> LSM303DLHC: 	3-axis accelerometer and 3-axis magnetometer (Learning Guide: http://adafru.it/cXW)
+	
 	> L3GD20:		3-axis gyroscope										(Learning Guide: http://adafru.it/cXX)
+	
 	> BMP180:		Barometric pressure sensor							(Learning Guide: http://adafru.it/cXY)
 	
 - Adafruit Ultimate GPS v3
@@ -19,15 +21,15 @@ This microcontroller also controls the rover's motor drivers and robotic arm dri
 
 How to connect Teensy 3.5 to Ethernet Board ENC28J60 through SPI communication:
 
-| SPI PIN | Teensy 3.5 | ENC28J60 |
-|:-------:|------------|----------|
-| CS      | 10 (CS0)   | 7        |
-| MOSI    | 11 (MOSI0) | 2        |
-| MISO    | 12 (MISO0) | 3        |
-| SCK     | 13 (SCK0)  | 1        |
-| RST     |            | 8        |
-| GND     |            | 9        |
-| 3.3 V   |            | 10       |
+									| SPI PIN | Teensy 3.5 | ENC28J60 |
+									|:-------:|------------|----------|
+									| CS      | 10 (CS0)   | 7        |
+									| MOSI    | 11 (MOSI0) | 2        |
+									| MISO    | 12 (MISO0) | 3        |
+									| SCK     | 13 (SCK0)  | 1        |
+									| RST     |            | 8        |
+									| GND     |            | 9        |
+									| 3.3 V   |            | 10       |
 
 
 

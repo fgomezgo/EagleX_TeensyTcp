@@ -4,7 +4,7 @@ The interaction between the TCP Server (.ino) and the TCP Client (.py) are held 
 
 Requests from server consist in a single integer which binary mask encodes information about the device ID, type of instruction and an aditional 15 bits of data (to specify the set velocity to a particular driver or group of drivers)
 
-![Protocol Image](https://github.com/fabo3011/EagleX_TeensyTcp/tree/master/TeensyTcpServer/.protocol_image.png "Bitmask Protocol Descriptor")
+![Protocol Image](https://github.com/fabo3011/EagleX_TeensyTcp/blob/master/TeensyTcpServer/.protocol_image.png "Bitmask Protocol Descriptor")
 
 Here's the description of each device's ID and instructions' ID
 

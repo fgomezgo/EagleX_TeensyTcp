@@ -1,7 +1,23 @@
-// Present a "Will be back soon web page", as stand-in webserver.
+// Eagle X project based on teensyTcp:
 // 2011-01-30 <jc@wippler.nl> http://opensource.org/licenses/mit-license.php
  
 #include <EtherCard.h>
+
+//Libraries for 10-DOF
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_LSM303_U.h>
+#include <Adafruit_BMP085_U.h>
+#include <Adafruit_L3GD20_U.h>
+#include <Adafruit_10DOF.h>
+
+/* Assign a unique ID to the sensors */
+Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(30301);
+Adafruit_LSM303_Mag_Unified   mag   = Adafruit_LSM303_Mag_Unified(30302);
+Adafruit_BMP085_Unified       bmp   = Adafruit_BMP085_Unified(18001);
+Adafruit_L3GD20_Unified       gyro  = Adafruit_L3GD20_Unified(20);
+
+
 
 #define STATIC 0  // set to 1 to disable DHCP (adjust myip/gwip values below)
 
@@ -54,6 +70,14 @@ void setup(){
   ether.printIp("IP:  ", ether.myip);
   ether.printIp("GW:  ", ether.gwip);  
   ether.printIp("DNS: ", ether.dnsip);  
+
+  //10-DOF Initializers
+  accel.begin();
+  mag.begin();
+  bmp.begin();
+  gyro.begin();
+
+  
 }
 
 void loop(){
@@ -64,6 +88,10 @@ void loop(){
     Serial.println(payloadPos);
     char* incomingData = (char *) Ethernet::buffer + payloadPos;
     Serial.println(incomingData);
+
+    //Intructions are a 4-digit number, where the two first digits from left to write describe the device ID and the last two digits describe the instruction ID
+
+    
     memcpy_P(ether.tcpOffset(), page, sizeof page);
     ether.httpServerReply(sizeof page - 1);
   }

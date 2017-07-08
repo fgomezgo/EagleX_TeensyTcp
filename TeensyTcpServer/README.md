@@ -1,8 +1,10 @@
-# Tcp Client (Arduino File)
+# Tcp Server (Arduino File)
 
 The interaction between the TCP Server (.ino) and the TCP Client (.py) are held by bidirectional messages following the protocol below:
 
-Petition format from the client to the server is a single 4 digit number, where the two first digits from left to write describe the device ID and the last two digits describe the instruction ID 
+Requests from server consist in a single integer which binary mask encodes information about the device ID, type of instruction and an aditional 15 bits of data (to specify the set velocity to a particular driver or group of drivers)
+
+
 
 Here's the description of each device's ID and instructions' ID
 

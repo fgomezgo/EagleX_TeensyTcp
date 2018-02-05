@@ -25,7 +25,7 @@ Adafruit_L3GD20_Unified       gyro  = Adafruit_L3GD20_Unified(20);
 // ethernet interface ip address
 static byte myip[] = { 192,168,1,200 };
 // gateway ip address
-static byte gwip[] = { 192,168,1,1 };
+static byte gwip[] = { 192,168,1,3};
 #endif
 
 // ethernet mac address - must be unique on your network

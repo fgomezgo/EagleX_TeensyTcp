@@ -1,45 +1,37 @@
-#!/usr/bin/env python
-
-import socket
+from socket import *
 import time
-
-
-TCP_IP = '192.168.0.102'
-TCP_PORT = 80
-BUFFER_SIZE = 100
-#MESSAGE = "Hello world!"
-
-i = 1
-#Do an update of 10-DOF data each second
-while 1:
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.connect((TCP_IP, TCP_PORT))
-	s.send('1010')
-	data_gyro = s.recv(BUFFER_SIZE)
-	s.close()
-	
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.connect((TCP_IP, TCP_PORT))
-	s.send('1011')
-	data_accel = s.recv(BUFFER_SIZE)
-	s.close()
-	
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.connect((TCP_IP, TCP_PORT))
-	s.send('1012')
-	data_magn = s.recv(BUFFER_SIZE)
-	s.close()
-	
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.connect((TCP_IP, TCP_PORT))
-	s.send('1013')
-	data_bmp = s.recv(BUFFER_SIZE)
-	s.close()
-	
-	print "received response: ",i
-	print "Gyroscope: ",			data_gyro
-	print "Accelerometer: ",	data_accel
-	print "Magnetometer: ",		data_magn
-	print "Pressure & Temperature: ",data_bmp
-	i = i+1
-	time.sleep(0.07)
+ 
+address = ( '192.168.1.200', 5000) #Defind who you are talking to (must match arduino IP and port)
+client_socket = socket(AF_INET, SOCK_DGRAM) #Set Up the Socket
+client_socket.settimeout(1) #only wait 1 second for a resonse
+ 
+while(1): #Main Loop
+ 
+    data = "Blue" #Set data to Blue Command
+    client_socket.sendto(data, address) #send command to arduino
+    try:
+        rec_data, addr = client_socket.recvfrom(2048) #Read response from arduino
+        print rec_data #Print the response from Arduino
+    except:
+        pass
+ 
+    #time.sleep(2) #delay before sending next command
+ 
+    data = "Red" #Set data to Blue Command
+    client_socket.sendto(data, address) #send command to arduino
+    try:
+        rec_data, addr = client_socket.recvfrom(2048) #Read response from arduino
+        print rec_data #Print the response from Arduino
+    except:
+        pass
+ 
+    #time.sleep(2) #delay before sending next command
+    
+    data = "Green" #Set data to Blue Command
+    client_socket.sendto(data, address) #send command to arduino
+    try:
+        rec_data, addr = client_socket.recvfrom(2048) #Read response from arduino
+        print rec_data #Print the response from Arduino
+    except:
+        pass
+    #time.sleep(2) #delay before sending next command

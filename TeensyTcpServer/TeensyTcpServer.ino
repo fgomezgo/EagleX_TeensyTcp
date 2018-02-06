@@ -14,6 +14,8 @@ Adafruit_GPS GPS(&GPSSerial);
 // Set to 'true' if you want to debug and listen to the raw GPS sentences
 #define GPSECHO false
 
+float longitude, latitude, gpspeed;
+
 uint32_t timer = millis();
 
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEE}; //Assign a mac address
@@ -132,15 +134,9 @@ void loop() {
       longitude = -convertDegMinToDecDeg(GPS.longitude);
       gpspeed = GPS.speed * 0.5144444;
       //Serial.println(gpspeed);
-      dtostrf(gpspeed,5,5,velocidad);
+      
       //Serial.println(velocidad);
-      gps_location.latitude = latitude;
-      gps_location.longitude = longitude;
-      gps_speed.data = gpspeed;
-      gps_speed_string.data = velocidad;
-      velocida.publish(&gps_speed_string);
-      fix.publish(&gps_location);
-      velocity.publish(&gps_speed);
+     
       /*
       Serial.print("Speed (knots): "); Serial.println(GPS.speed);
       Serial.print("Angle: "); Serial.println(GPS.angle);
@@ -158,25 +154,22 @@ void loop() {
   
   Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE); //Reading the data request on the Udp
   String datReq(packetBuffer); //Convert packetBuffer array to string datReq
+  Serial.println(datReq );
   
   if (datReq =="Red") { //See if Red was requested
-  
+    //Serial.println("Pediste latitud");
     Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());  //Initialize Packet send
-    Udp.print("You are Asking for Red"); //Send string back to client 
+    Udp.print(latitude,7); //Send string back to client 
     Udp.endPacket(); //Packet has been sent
+    Serial.println(latitude,7);
   }
    if (datReq =="Green") { //See if Green was requested
-  
+    //Serial.println("Pediste longitud");
     Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());  //Initialize Packet send
-    Udp.print("You are Asking for Green"); //Send string back to client 
+    Udp.print(longitude); //Send string back to client 
     Udp.endPacket(); //Packet has been sent
    }
-    if (datReq =="Blue") { //See if Red was requested
-  
-    Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());  //Initialize Packet send
-    Udp.print("You are Asking for Blue"); //Send string back to client 
-    Udp.endPacket(); //Packet has been sent
-    }
+    
   }
   memset(packetBuffer, 0, UDP_TX_PACKET_MAX_SIZE);
 }

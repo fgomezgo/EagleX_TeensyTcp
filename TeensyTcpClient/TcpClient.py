@@ -44,7 +44,8 @@ class RoverComms():
     def synch(self):
     #############################################################
         #data = Send bytes
-        data = bytearray([0x00,0x67])
+        #data = bytearray([0x00,0x67])
+        data ="Red"
         self.socket.sendto(data, self.address) #send command to arduino
         try:
             rec_data, addr = self.socket.recvfrom(10) #Read response from arduino

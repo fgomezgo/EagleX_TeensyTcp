@@ -17,6 +17,7 @@ class Comms
     void commsStart();    // Resets module and initializes ethernet settings
     boolean commsAvailable(); // Returns true if data at port
     unsigned int commsRead();
+    void commsWrite();
     void commsReadOld();
     EthernetUDP Udp; //Define UDP Object
     int packetSize; //Size of Packet
@@ -26,7 +27,6 @@ class Comms
     byte *_mac;
     unsigned int _localPort;
     char _packetBuffer[UDP_TX_PACKET_MAX_SIZE];
-    String _dataReq; //String for our data
     
 };
 

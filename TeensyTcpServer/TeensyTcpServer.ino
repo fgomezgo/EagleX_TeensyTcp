@@ -6,8 +6,8 @@ unsigned int localPort = 5000; //Assign a Port to talk over
 unsigned int request;
 
 String datReq; //String for our data
-
 Comms comms(ip, mac, localPort);
+
 
 // States
 
@@ -39,7 +39,9 @@ void loop() {
       }
       break;
     case GPS:
-      Serial.println("GPS request");
+      comms.Udp.beginPacket(comms.Udp.remoteIP(), comms.Udp.remotePort());  //Initialize Packet send
+      comms.Udp.print("GPS"); //Send string back to client 
+      comms.Udp.endPacket(); //Packet has been sent
 
       
       break;

@@ -46,13 +46,12 @@ boolean Comms::commsAvailable()
 unsigned int Comms::commsRead()
 {
   Udp.read(_packetBuffer, UDP_TX_PACKET_MAX_SIZE); //Reading the data request on the Udp
-  String _dataReq(_packetBuffer); //Convert _packetBuffer array to string _dataReq
   unsigned int ID = (_packetBuffer[0] <<24) | (_packetBuffer[1] <<16) | (_packetBuffer[2] <<8) | _packetBuffer[3];
   memset(_packetBuffer, 0, UDP_TX_PACKET_MAX_SIZE);
   return ID;
 }
 
-
+/*
 void Comms::commsReadOld()
 {
    packetSize = Udp.parsePacket(); //Read the packetSize
@@ -84,3 +83,4 @@ void Comms::commsReadOld()
   memset(_packetBuffer, 0, UDP_TX_PACKET_MAX_SIZE);
    
 }
+*/

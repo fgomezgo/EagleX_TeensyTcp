@@ -13,18 +13,20 @@ class Comms
 {
   public:
     Comms(IPAddress ip, byte *mac, unsigned int localPort);
-    void resetModule();
-    void startComms();
-    void readComms();
-    
+    void moduleReset();   // Resets module with a fancy routine
+    void commsStart();    // Resets module and initializes ethernet settings
+    boolean commsAvailable(); // Returns true if data at port
+    unsigned int commsRead();
+    void commsWrite();
+    void commsReadOld();
+    EthernetUDP Udp; //Define UDP Object
+    int packetSize; //Size of Packet
+
   private:
     IPAddress _ip;
     byte *_mac;
     unsigned int _localPort;
-    EthernetUDP _Udp; //Define UDP Object
-    int _packetSize; //Size of Packet
     char _packetBuffer[UDP_TX_PACKET_MAX_SIZE];
-    String _datReq; //String for our data
     
 };
 

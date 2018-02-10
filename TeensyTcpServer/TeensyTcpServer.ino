@@ -1,5 +1,5 @@
 #include "src/Comms/Comms.h"
-#include "src/GPS/Gps.h"
+#include "src/Location/Location.h"
 
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEE}; //Assign a mac address
 IPAddress ip(192, 168, 1, 200); //Assign my IP adress
@@ -8,8 +8,7 @@ unsigned int request;
 
 String datReq; //String for our data
 Comms comms(ip, mac, localPort);
-Gps gps();
-
+Location location(1);
 // States
 
 typedef enum{
@@ -23,8 +22,8 @@ ServerStates cState;    // Current state
 void setup() {
   Serial.begin(9600); //Turn on Serial Port
   comms.commsStart();
-  gps.gpsConfigure();
-  cState = IDLE;
+  location.moduleConfigure();
+  cState = LOCATION;
 }
 
 void loop() {
@@ -41,9 +40,27 @@ void loop() {
       }
       break;
     case LOCATION:
+      location.updateData();
+      if(location.getFix()){
+        Serial.print(location.getFix());
+        Serial.print(" ");
+        Serial.print(" ");
+        Serial.print(location.getLatitude(),5);
+        Serial.print(" ");
+        Serial.print(location.getLongitude(),5);
+        Serial.print(" ");
+        Serial.print(location.getHeading());
+        Serial.print(" ");
+        Serial.println(location.getAltitude());
+        
+      }else{
+        Serial.println(location.getFix());
+      }
+
+    /*
       comms.Udp.beginPacket(comms.Udp.remoteIP(), comms.Udp.remotePort());  //Initialize Packet send
       comms.Udp.print("GPS"); //Send string back to client 
-      comms.Udp.endPacket(); //Packet has been sent
+      comms.Udp.endPacket(); //Packet has been sent*/
 
       
       break;

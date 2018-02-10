@@ -1,4 +1,5 @@
 #include "src/Comms/Comms.h"
+#include "src/GPS/Gps.h"
 
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEE}; //Assign a mac address
 IPAddress ip(192, 168, 1, 200); //Assign my IP adress
@@ -7,13 +8,13 @@ unsigned int request;
 
 String datReq; //String for our data
 Comms comms(ip, mac, localPort);
-
+Gps gps();
 
 // States
 
 typedef enum{
   IDLE,     // Awaits for communication  and gets the id
-  GPS,
+  LOCATION,
 }ServerStates;
 
 ServerStates cState;    // Current state
@@ -22,6 +23,7 @@ ServerStates cState;    // Current state
 void setup() {
   Serial.begin(9600); //Turn on Serial Port
   comms.commsStart();
+  gps.gpsConfigure();
   cState = IDLE;
 }
 
@@ -31,14 +33,14 @@ void loop() {
       if(comms.commsAvailable()){   // If data is at socket
         switch(comms.commsRead()){  // Read data and send to device 
           case 0x19:
-            cState = GPS;
+            cState = LOCATION;
             break;
         }
       }else{
         cState = IDLE;
       }
       break;
-    case GPS:
+    case LOCATION:
       comms.Udp.beginPacket(comms.Udp.remoteIP(), comms.Udp.remotePort());  //Initialize Packet send
       comms.Udp.print("GPS"); //Send string back to client 
       comms.Udp.endPacket(); //Packet has been sent

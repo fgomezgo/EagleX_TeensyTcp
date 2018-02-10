@@ -24,7 +24,7 @@ class RoverComms():
         rospy.loginfo("Starting socket at: %s" % self.address[0])
         self.socket = socket(AF_INET, SOCK_DGRAM)
         self.socket.settimeout(1)
-        self.rate = rospy.get_param("~rate", 20)
+        self.rate = rospy.get_param("~rate", 10)
         """
         self.pub_lmotor = rospy.Publisher('left_motor/setpoint', Float64, queue_size=10)
         self.pub_rmotor = rospy.Publisher('right_motor/setpoint', Float64, queue_size=10)
@@ -43,17 +43,22 @@ class RoverComms():
     #############################################################
     def synch(self):
     #############################################################
-        #data = Send bytes
-        #data = bytearray([0x00,0x67])
-        data ="Red"
+        """
+        Byte array with device and isntruction Ids
+        [0x00,0x00,0x00,0x19] is the isntruction for obtaining the GPS lat/long
+        [0x98,0x76,0x54,0x32] is just an example 
+        """
+        data = bytearray([0x00,0x00,0x00,0x19])
         self.socket.sendto(data, self.address) #send command to arduino
+        """
         try:
             rec_data, addr = self.socket.recvfrom(10) #Read response from arduino
-            print type(rec_data)
+            #print type(rec_data)
             print rec_data  #Print the response from Arduino
 
         except:
             pass
+        """
         """        # dx = (l + r) / 2
         # dr = (r - l) / w
             

@@ -11,10 +11,10 @@ Comms::Comms(IPAddress ip, byte *mac, unsigned int localPort)
   _ip = ip;
   _mac = mac;
   _localPort = localPort;
-  EthernetUDP _Udp; //Define UDP Object
+  EthernetUDP Udp; //Define UDP Object
 }
 
-void Comms::resetModule()
+void Comms::moduleReset()
 {
   // Begin reset sequence for WIZ820ip ethernet module
   pinMode(9, OUTPUT);
@@ -25,41 +25,60 @@ void Comms::resetModule()
   digitalWrite(9, HIGH);   // end reset pulse  
 }
 
-void Comms::startComms()
+void Comms::commsStart()
 {
-   resetModule();
+   moduleReset();
    Ethernet.begin(_mac, _ip); //Initialize Ethernet
-   _Udp.begin(_localPort); //Initialize Udp
+   Udp.begin(_localPort); //Initialize Udp
    delay(1500); //delay
 }
 
-
-void Comms::readComms()
+boolean Comms::commsAvailable()
 {
-   _packetSize = _Udp.parsePacket(); //Read the packetSize
-   
-  if(_packetSize>0){ //Check to see if a request is present
-  
-  _Udp.read(_packetBuffer, UDP_TX_PACKET_MAX_SIZE); //Reading the data request on the Udp
-  String _datReq(_packetBuffer); //Convert _packetBuffer array to string _datReq
-  Serial.println("Req");
-  if (_datReq =="Red") { //See if Red was requested
-  
-    _Udp.beginPacket(_Udp.remoteIP(), _Udp.remotePort());  //Initialize Packet send
-    _Udp.print("You are Asking for Red"); //Send string back to client 
-    _Udp.endPacket(); //Packet has been sent
+  packetSize = Udp.parsePacket(); //Read the packetSize
+  if(packetSize > 0){
+    return 1;
+  }else{
+    return 0;
   }
-   if (_datReq =="Green") { //See if Green was requested
+}
+
+unsigned int Comms::commsRead()
+{
+  Udp.read(_packetBuffer, UDP_TX_PACKET_MAX_SIZE); //Reading the data request on the Udp
+  String _dataReq(_packetBuffer); //Convert _packetBuffer array to string _dataReq
+  unsigned int ID = (_packetBuffer[0] <<24) | (_packetBuffer[1] <<16) | (_packetBuffer[2] <<8) | _packetBuffer[3];
+  memset(_packetBuffer, 0, UDP_TX_PACKET_MAX_SIZE);
+  return ID;
+}
+
+
+void Comms::commsReadOld()
+{
+   packetSize = Udp.parsePacket(); //Read the packetSize
+   
+  if(packetSize>0){ //Check to see if a request is present
   
-    _Udp.beginPacket(_Udp.remoteIP(), _Udp.remotePort());  //Initialize Packet send
-    _Udp.print("You are Asking for Green"); //Send string back to client 
-    _Udp.endPacket(); //Packet has been sent
+  Udp.read(_packetBuffer, UDP_TX_PACKET_MAX_SIZE); //Reading the data request on the Udp
+  String _dataReq(_packetBuffer); //Convert _packetBuffer array to string _dataReq
+  Serial.println("Req");
+  if (_dataReq =="Red") { //See if Red was requested
+  
+    Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());  //Initialize Packet send
+    Udp.print("You are Asking for Red"); //Send string back to client 
+    Udp.endPacket(); //Packet has been sent
+  }
+   if (_dataReq =="Green") { //See if Green was requested
+  
+    Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());  //Initialize Packet send
+    Udp.print("You are Asking for Green"); //Send string back to client 
+    Udp.endPacket(); //Packet has been sent
    }
-    if (_datReq =="Blue") { //See if Red was requested
+    if (_dataReq =="Blue") { //See if Red was requested
   
-    _Udp.beginPacket(_Udp.remoteIP(), _Udp.remotePort());  //Initialize Packet send
-    _Udp.print("You are Asking for Blue"); //Send string back to client 
-    _Udp.endPacket(); //Packet has been sent
+    Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());  //Initialize Packet send
+    Udp.print("You are Asking for Blue"); //Send string back to client 
+    Udp.endPacket(); //Packet has been sent
     }
   }
   memset(_packetBuffer, 0, UDP_TX_PACKET_MAX_SIZE);

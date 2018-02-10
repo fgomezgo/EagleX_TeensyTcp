@@ -76,7 +76,6 @@ void Location::updateData(){
 }
 
 bool Location::getFix(){
-  updateData();
   return (char)GPS.fix;
 }
 

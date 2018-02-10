@@ -5,6 +5,7 @@ import roslib
 from std_msgs.msg import Float64
 from geometry_msgs.msg import Twist
 from socket import *
+from datetime import datetime
 import time 
 
 #############################################################
@@ -24,7 +25,7 @@ class RoverComms():
         rospy.loginfo("Starting socket at: %s" % self.address[0])
         self.socket = socket(AF_INET, SOCK_DGRAM)
         self.socket.settimeout(1)
-        self.rate = rospy.get_param("~rate", 10)
+        self.rate = rospy.get_param("~rate", 1)
         """
         self.pub_lmotor = rospy.Publisher('left_motor/setpoint', Float64, queue_size=10)
         self.pub_rmotor = rospy.Publisher('right_motor/setpoint', Float64, queue_size=10)
@@ -48,11 +49,12 @@ class RoverComms():
         [0x00,0x00,0x00,0x19] is the isntruction for obtaining the GPS lat/long
         [0x98,0x76,0x54,0x32] is just an example 
         """
+        print str(datetime.now())
         data = bytearray([0x00,0x00,0x00,0x19])
         #print type(data)
         self.socket.sendto(data, self.address) #send command to arduino
         try:
-            data, addr = self.socket.recvfrom(10) #Read response from arduino
+            data, addr = self.socket.recvfrom(15) #Read response from arduino
             #print type(data)
             print data
 

@@ -16,6 +16,7 @@ typedef enum{
   LOCATION,
   LOC_GET,
   LOC_LAT,
+  LOC_LON,
   LOC_NO_FIX,
 }ServerStates;
 
@@ -24,7 +25,7 @@ ServerStates cState;    // Current state
 
 void setup() {
   Serial.begin(9600); //Turn on Serial Port
-  comms.commsStart();
+  comms.start();
   location.moduleConfigure();
   cState = IDLE;
 }
@@ -32,10 +33,13 @@ void setup() {
 void loop() {
   switch(cState){
     case IDLE:
-      if(comms.commsAvailable()){   // If data is at socket
-        switch(comms.commsRead()){  // Read data and send to device 
+      if(comms.available()){   // If data is at socket
+        switch(comms.read()){  // Read data and send to device 
           case 0x19:
             cState = LOC_LAT;
+            break;
+          case 0x1A:
+            cState = LOC_LON;
             break;
         }
       }else{
@@ -43,27 +47,32 @@ void loop() {
       }
       break;
 
-    case LOC_GET:
+    case LOC_GET:   // Gets updated data from GPS when no requests  are present
       location.updateData();
       cState = IDLE;
       break;
 
-    case LOC_LAT:
+    case LOC_LAT:   // Gets latitude from GPS module and returns to client
       if(location.getFix()){
-        comms.Udp.beginPacket(comms.Udp.remoteIP(), comms.Udp.remotePort());  //Initialize Packet send
-        comms.Udp.print(location.getLatitude(),5); //Send string back to client 
-        comms.Udp.endPacket(); //Packet has been sent
+        comms.writePrecision(location.getLatitude(),5);
         cState = IDLE;
       }else{
         cState = LOC_NO_FIX;
       }
       break;
 
-    case LOC_NO_FIX:
+    case LOC_LON:   // Gets longitude from GPS module and returns to client
+      if(location.getFix()){
+        comms.writePrecision(location.getLongitude(),5);
+        cState = IDLE;
+      }else{
+        cState = LOC_NO_FIX;
+      }
+      break;
+
+    case LOC_NO_FIX:  // If there is no FIX sends Error to host
       // Send no fix error back
-      comms.Udp.beginPacket(comms.Udp.remoteIP(), comms.Udp.remotePort());  //Initialize Packet send
-      comms.Udp.print("ERR: No fix"); //Send string back to client 
-      comms.Udp.endPacket(); //Packet has been sent
+      comms.write("-1");
       // Back to idle
       cState = IDLE;
       break;

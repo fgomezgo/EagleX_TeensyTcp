@@ -4,7 +4,6 @@
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEE}; //Assign a mac address
 IPAddress ip(192, 168, 1, 200); //Assign my IP adress
 unsigned int localPort = 5000; //Assign a Port to talk over
-unsigned int request;
 
 String datReq; //String for our data
 Comms comms(ip, mac, localPort);
@@ -13,7 +12,6 @@ Location location(1);
 
 typedef enum{
   IDLE,     // Awaits for communication  and gets the id
-  LOCATION,
   LOC_GET,
   LOC_LAT,
   LOC_LON,

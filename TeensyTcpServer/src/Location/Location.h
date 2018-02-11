@@ -15,7 +15,6 @@ class Location{
         void updateData();
         double convertDegMinToDecDeg (float degMin);
         void getCoordinates();
-        
         float getLongitude();
         float getLatitude();
         float getHeading();

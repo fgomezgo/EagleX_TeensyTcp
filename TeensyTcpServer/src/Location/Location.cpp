@@ -79,7 +79,6 @@ bool Location::getFix(){
   return (char)GPS.fix;
 }
 
-
 float Location:: getLatitude(){
   updateData();
   return convertDegMinToDecDeg(GPS.latitude);

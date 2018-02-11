@@ -22,7 +22,6 @@ typedef enum{
 
 ServerStates cState;    // Current state
 
-
 void setup() {
   Serial.begin(9600); //Turn on Serial Port
   comms.start();
@@ -70,7 +69,7 @@ void loop() {
       }
       break;
 
-    case LOC_NO_FIX:  // If there is no FIX sends Error to host
+    case LOC_NO_FIX:  // If there is no FIX send error to host
       // Send no fix error back
       comms.write("-1");
       // Back to idle
@@ -80,12 +79,4 @@ void loop() {
     default:
       break;
   }
-  
-  //Serial.println(comms.commsAvailable());
-  /*
-  if(comms.commsAvailable()){
-    Serial.println("Msg");
-    comms.commsRead();
-  }*/
-  
 }

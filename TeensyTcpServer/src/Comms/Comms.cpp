@@ -1,5 +1,5 @@
 /*
-  Eagle X's rover communication library Comms.h - Library for managing the Wiz820io ethernet module
+  Eagle X's rover communication library h - Library for managing the Wiz820io ethernet module
 */
 
 #include "Arduino.h"
@@ -25,7 +25,7 @@ void Comms::moduleReset()
   digitalWrite(9, HIGH);   // end reset pulse  
 }
 
-void Comms::commsStart()
+void Comms::start()
 {
    moduleReset();
    Ethernet.begin(_mac, _ip); //Initialize Ethernet
@@ -33,7 +33,19 @@ void Comms::commsStart()
    delay(1500); //delay
 }
 
-boolean Comms::commsAvailable()
+void Comms::writePrecision(float data, char precision){
+  Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());  //Initialize Packet send
+  Udp.print(data, precision); //Send string back to client 
+  Udp.endPacket(); //Packet has been sent
+}
+
+void Comms::write(String data){
+  Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());  //Initialize Packet send
+  Udp.print(data); //Send string back to client 
+  Udp.endPacket(); //Packet has been sent
+}
+
+boolean Comms::available()
 {
   packetSize = Udp.parsePacket(); //Read the packetSize
   if(packetSize > 0){
@@ -43,7 +55,7 @@ boolean Comms::commsAvailable()
   }
 }
 
-unsigned int Comms::commsRead()
+unsigned int Comms::read()
 {
   Udp.read(_packetBuffer, UDP_TX_PACKET_MAX_SIZE); //Reading the data request on the Udp
   unsigned int ID = (_packetBuffer[0] <<24) | (_packetBuffer[1] <<16) | (_packetBuffer[2] <<8) | _packetBuffer[3];
@@ -51,36 +63,3 @@ unsigned int Comms::commsRead()
   return ID;
 }
 
-/*
-void Comms::commsReadOld()
-{
-   packetSize = Udp.parsePacket(); //Read the packetSize
-   
-  if(packetSize>0){ //Check to see if a request is present
-  
-  Udp.read(_packetBuffer, UDP_TX_PACKET_MAX_SIZE); //Reading the data request on the Udp
-  String _dataReq(_packetBuffer); //Convert _packetBuffer array to string _dataReq
-  Serial.println("Req");
-  if (_dataReq =="Red") { //See if Red was requested
-  
-    Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());  //Initialize Packet send
-    Udp.print("You are Asking for Red"); //Send string back to client 
-    Udp.endPacket(); //Packet has been sent
-  }
-   if (_dataReq =="Green") { //See if Green was requested
-  
-    Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());  //Initialize Packet send
-    Udp.print("You are Asking for Green"); //Send string back to client 
-    Udp.endPacket(); //Packet has been sent
-   }
-    if (_dataReq =="Blue") { //See if Red was requested
-  
-    Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());  //Initialize Packet send
-    Udp.print("You are Asking for Blue"); //Send string back to client 
-    Udp.endPacket(); //Packet has been sent
-    }
-  }
-  memset(_packetBuffer, 0, UDP_TX_PACKET_MAX_SIZE);
-   
-}
-*/

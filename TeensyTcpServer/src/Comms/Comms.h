@@ -14,10 +14,11 @@ class Comms
   public:
     Comms(IPAddress ip, byte *mac, unsigned int localPort);
     void moduleReset();   // Resets module with a fancy routine
-    void commsStart();    // Resets module and initializes ethernet settings
-    boolean commsAvailable(); // Returns true if data at port
-    unsigned int commsRead();
-    void commsWrite();
+    void start();    // Resets module and initializes ethernet settings
+    boolean available(); // Returns true if data at port
+    unsigned int read();
+    void writePrecision(float data, char precision);
+    void write(String data);
     void commsReadOld();
     EthernetUDP Udp; //Define UDP Object
     int packetSize; //Size of Packet

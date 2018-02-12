@@ -1,6 +1,6 @@
 #include "src/Comms/Comms.h"
 #include "src/Location/Location.h"
-#include "src/Motor/Motor.h"
+#include "src/Actuator/Actuator.h"
 
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEE}; //Assign a mac address
 IPAddress ip(192, 168, 1, 200); //Assign my IP adress
@@ -10,7 +10,7 @@ unsigned int request;
 String datReq; //String for our data
 Comms comms(ip, mac, localPort);      //  Ethernet module object
 Location location(1);                 // GPS module object
-Motor motor(5,6);
+Actuator actuator(5,6);                     // configure SMC  reset and  error pins
 
 // States
 typedef enum{
@@ -20,15 +20,23 @@ typedef enum{
   LOC_LAT,
   LOC_LON,
   LOC_NO_FIX,
+  TEST,
 }ServerStates;
 
 ServerStates cState;    // Current state
 
 void setup() {
   Serial.begin(9600); //Turn on Serial Port
+
   comms.start();
   location.moduleConfigure();
-  cState = IDLE;
+  actuator.motorConfigureAndReset();
+
+  //actuator.motorSetSpeed(3200,3);
+  actuator.motorSetAllSpeed(3200, -3200);
+
+  //Set next state
+  cState = TEST;
 }
 
 void loop() {
@@ -76,6 +84,9 @@ void loop() {
       comms.write("-1");
       // Back to idle
       cState = IDLE;
+      break;
+    case TEST:
+      Serial.println(actuator.motorGetVoltage(3));
       break;
 
     default:

@@ -10,7 +10,8 @@ class Actuator{
   public:
     // Constructor, sets the reset and error pins
     Actuator(char reset, char error);
-    
+
+    /* -------------- Pololu Controllers -------------- */
     // Utility methods/functions
     void motorConfigureAndReset();
     int motorReadByte();
@@ -27,7 +28,7 @@ class Actuator{
     unsigned int motorGetVoltage(unsigned char device);
     unsigned int motorGetTemp(unsigned char device);
     void motorSetSpeed(int speed, unsigned char device);
-
+    
     
 
   private:

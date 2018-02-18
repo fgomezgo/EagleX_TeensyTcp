@@ -1,119 +1,83 @@
-// Eagle X project based on teensyTcp:
-// 2011-01-30 <jc@wippler.nl> http://opensource.org/licenses/mit-license.php
- 
-#include <EtherCard.h>
+#include "src/Comms/Comms.h"
+#include "src/Location/Location.h"
+#include "src/Imu/Imu.h"
 
-//Libraries for 10-DOF
-#include <Wire.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_LSM303_U.h>
-#include <Adafruit_BMP085_U.h>
-#include <Adafruit_L3GD20_U.h>
-#include <Adafruit_10DOF.h>
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEE}; //Assign a mac address
+IPAddress ip(192, 168, 1, 200); //Assign my IP adress
+unsigned int localPort = 5000; //Assign a Port to talk over
+unsigned int request;
 
-/* Assign a unique ID to the sensors */
-Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(30301);
-Adafruit_LSM303_Mag_Unified   mag   = Adafruit_LSM303_Mag_Unified(30302);
-Adafruit_BMP085_Unified       bmp   = Adafruit_BMP085_Unified(18001);
-Adafruit_L3GD20_Unified       gyro  = Adafruit_L3GD20_Unified(20);
+String datReq; //String for our data
+Comms comms(ip, mac, localPort);
+Location location(1);
+// States
 
+typedef enum{
+  IDLE,     // Awaits for communication  and gets the id
+  LOCATION,
+  LOC_GET,
+  LOC_LAT,
+  LOC_LON,
+  LOC_NO_FIX,
+}ServerStates;
 
+ServerStates cState;    // Current state
 
-#define STATIC 0  // set to 1 to disable DHCP (adjust myip/gwip values below)
-
-#if STATIC
-// ethernet interface ip address
-static byte myip[] = { 192,168,1,200 };
-// gateway ip address
-static byte gwip[] = { 192,168,1,1 };
-#endif
-
-// ethernet mac address - must be unique on your network
-static byte mymac[] = { 0x74,0x69,0x69,0x2D,0x30,0x31 };
-
-byte Ethernet::buffer[500]; // tcp/ip send and receive buffer
-
-//Integer to store the number descriptor coming from the client
-int client_instr;
-//String to store the message response to the client
-char server_response[100];
-
-
-void setup(){
-  Serial.begin(57600);
-  Serial.println("\n[backSoon]");
-  
-  if (ether.begin(sizeof Ethernet::buffer, mymac) == 0) 
-    Serial.println( "Failed to access Ethernet controller");
-#if STATIC
-  ether.staticSetup(myip, gwip);
-#else
-  if (!ether.dhcpSetup())
-    Serial.println("DHCP failed");
-#endif
-
-  ether.printIp("IP:  ", ether.myip);
-  ether.printIp("GW:  ", ether.gwip);  
-  ether.printIp("DNS: ", ether.dnsip);  
-
-  //10-DOF Initializers
-  accel.begin();
-  mag.begin();
-  bmp.begin();
-  gyro.begin();
-
-  
+void setup() {
+  Serial.begin(9600); //Turn on Serial Port
+  comms.start();
+  location.moduleConfigure();
+  cState = IDLE;
 }
 
-void loop(){
-  // wait for an incoming TCP packet, but ignore its contents
-   uint16_t payloadPos = ether.packetLoop(ether.packetReceive());
- 
-  if (payloadPos) {
-    //Serial.println(payloadPos);
-    char* incomingData = (char *) Ethernet::buffer + payloadPos;
-    //Serial.println(incomingData);
-    sscanf(incomingData,"%d",&client_instr);
-
-/*  | Device ID | Device Description | Instruction ID |      Instruction Description      |
-    |:---------:|:------------------:|:--------------:|:---------------------------------:|
-    | 10        | 10-DOF             | 10             | Gyroscope Information (x,y,z)     |
-    |           |                    | 11             | Accelerometer Information (x,y,z) |
-    |           |                    | 12             | Magnetometer Information (x,y,z)  |
-    |           |                    | 13             | Pressure and Temperature          |*/
-
-    memset(server_response,0,sizeof server_response);
-    switch(client_instr/100){
-          case 10: //10-DOF
-          
-              sensors_event_t event;
-              
-             switch(client_instr%100){
-                  case 10:
-                        gyro.getEvent(&event);
-                        sprintf(server_response,"%.6f %.6f %.6f",event.gyro.x,event.gyro.y,event.gyro.z);
-                  break;
-                  case 11:
-                       accel.getEvent(&event);
-                       sprintf(server_response,"%.6f %.6f %.6f",event.acceleration.x,event.acceleration.y,event.acceleration.z); 
-                  break;
-                  case 12:
-                       mag.getEvent(&event);
-                       sprintf(server_response,"%.6f %.6f %.6f",event.magnetic.x,event.magnetic.y,event.magnetic.z);
-                  break;
-                  case 13:
-                       bmp.getEvent(&event);
-                       float temperature;
-                       bmp.getTemperature(&temperature);
-                       sprintf(server_response,"%.6f %.6f",event.pressure,temperature);
-                  break;
-              } 
-              memcpy_P(ether.tcpOffset(), server_response, sizeof server_response);
-              ether.httpServerReply(sizeof server_response - 1);
-                       
-          break;
-      
+void loop() {
+  switch(cState){
+    case IDLE:
+      if(comms.available()){   // If data is at socket
+        switch(comms.read()){  // Read data and send to device 
+          case 0x19:
+            cState = LOC_LAT;
+            break;
+          case 0x1A:
+            cState = LOC_LON;
+            break;
+        }
+      }else{
+        cState = LOC_GET;
       }
+      break;
 
+    case LOC_GET:   // Gets updated data from GPS when no requests  are present
+      location.updateData();
+      cState = IDLE;
+      break;
+
+    case LOC_LAT:   // Gets latitude from GPS module and returns to client
+      if(location.getFix()){
+        comms.writePrecision(location.getLatitude(),5);
+        cState = IDLE;
+      }else{
+        cState = LOC_NO_FIX;
+      }
+      break;
+
+    case LOC_LON:   // Gets longitude from GPS module and returns to client
+      if(location.getFix()){
+        comms.writePrecision(location.getLongitude(),5);
+        cState = IDLE;
+      }else{
+        cState = LOC_NO_FIX;
+      }
+      break;
+
+    case LOC_NO_FIX:  // If there is no FIX send error to host
+      // Send no fix error back
+      comms.write("-1");
+      // Back to idle
+      cState = IDLE;
+      break;
+
+    default:
+      break;
   }
 }

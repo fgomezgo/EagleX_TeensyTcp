@@ -1,0 +1,4 @@
+Comms	KEYWORD1
+resetModule	KEYWORD2
+startComms	KEYWORD2
+readComms	KEYWORD2

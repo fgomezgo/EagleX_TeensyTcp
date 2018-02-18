@@ -1,0 +1,45 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true,
+                "path": [
+                    "/home/bpinedad96/catkin_ws/devel/include",
+                    "/opt/ros/kinetic/include",
+                    "/home/bpinedad96/catkin_ws/src/beginner_tutorials/include",
+                    "/home/bpinedad96/catkin_ws/src/brandon_package/include",
+                    "/home/bpinedad96/catkin_ws/src/eaglex_launch/include",
+                    "/home/bpinedad96/catkin_ws/src/learning_tf/include",
+                    "/home/bpinedad96/catkin_ws/src/luisrover/include",
+                    "/home/bpinedad96/catkin_ws/src/model/include",
+                    "/home/bpinedad96/catkin_ws/src/robot_rover_pkg/include",
+                    "/home/bpinedad96/catkin_ws/src/robot_state_publisher-kinetic-devel/include",
+                    "/home/bpinedad96/catkin_ws/src/rosserial/rosserial_server/include",
+                    "/home/bpinedad96/catkin_ws/src/rosserial/rosserial_test/include",
+                    "/home/bpinedad96/catkin_ws/src/usb_cam/include",
+                    "/usr/include"
+                ]
+            },
+            "includePath": [
+                "/home/bpinedad96/catkin_ws/devel/include",
+                "/opt/ros/kinetic/include",
+                "/home/bpinedad96/catkin_ws/src/beginner_tutorials/include",
+                "/home/bpinedad96/catkin_ws/src/brandon_package/include",
+                "/home/bpinedad96/catkin_ws/src/eaglex_launch/include",
+                "/home/bpinedad96/catkin_ws/src/learning_tf/include",
+                "/home/bpinedad96/catkin_ws/src/luisrover/include",
+                "/home/bpinedad96/catkin_ws/src/model/include",
+                "/home/bpinedad96/catkin_ws/src/robot_rover_pkg/include",
+                "/home/bpinedad96/catkin_ws/src/robot_state_publisher-kinetic-devel/include",
+                "/home/bpinedad96/catkin_ws/src/rosserial/rosserial_server/include",
+                "/home/bpinedad96/catkin_ws/src/rosserial/rosserial_test/include",
+                "/home/bpinedad96/catkin_ws/src/usb_cam/include",
+                "/usr/include"
+            ],
+            "name": "Linux",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 3
+}

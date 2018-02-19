@@ -10,11 +10,11 @@ Encoders::Encoders(int x){
 
 void Encoders::initEncoders() {
     /* Assign a unique ID to the sensors */
-    encoders[0]=myEncl1;
-    encoders[1]=myEncr1;
+    encoders[0]=Encoder (13, 11); //Left 1
+    encoders[1]=Encoder (3, 5); //Right 1
 }
 
-void Encoders::readEncoder(int i) {
+float Encoders::readEncoder(int i) {
     newPosition[i] = encoders[i].read();
     if (newPosition[i] != oldPosition[i]) {
         rads[i] = abs(oldPosition[i]-newPosition[i])*(pi/100.0);
@@ -23,6 +23,7 @@ void Encoders::readEncoder(int i) {
     }else{
         rads[i]=0;
     }
+    return rads[i];
 }
 
 void Encoders::readEncoders() {

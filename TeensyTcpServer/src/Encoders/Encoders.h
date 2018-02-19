@@ -12,13 +12,11 @@ class Encoders{
     public:
         Encoders(int x);
         void initEncoders ();
-        void readEncoder (int i); //Read specific encoder
+        float readEncoder (int i); //Read specific encoder
         void readEncoders();  //Readall encoders
 
     private:
-        Encoder myEncl1(13, 11);
-        Encoder myEncr1(3, 5);
-        Encoder encoders [6];
+        Encoder * encoders;
         long oldPosition[6]={-999, -999, -999, -999, -999, -999};
         long newPosition[6];
         float rads[6];
@@ -27,3 +25,5 @@ class Encoders{
         float r = 0.075;
 
 };
+
+#endif

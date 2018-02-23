@@ -30,10 +30,10 @@ void setup() {
 
   comms.start();
   location.moduleConfigure();
-  actuator.motorConfigureAndReset();
+  actuator.controllerConfigureReset();
 
   //actuator.motorSetSpeed(3200,3);
-  actuator.motorSetAllSpeed(3200, -3200);
+  actuator.driveSetAllSpeed(3200, -3200);
 
   //Set next state
   cState = TEST;
@@ -86,7 +86,7 @@ void loop() {
       cState = IDLE;
       break;
     case TEST:
-      Serial.println(actuator.motorGetVoltage(3));
+      Serial.println(actuator.driveGetVoltage(3));
       break;
 
     default:

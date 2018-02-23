@@ -17,6 +17,7 @@ class Actuator{
     void controllerConfigureReset();
     int controllerReadByte();
     unsigned int controllerGetVariable(unsigned char variableID, unsigned char device);
+    void controllerExitSafeStart();
     
     /* -------------- Drive System -------------- */
     // Methods/fucntions that allow the user to set drive system speed/ get board information
@@ -26,12 +27,12 @@ class Actuator{
     unsigned int driveGetAvgVoltage();
     unsigned int driveGetAvgTemp();
     bool driveGetError();
-    void driveExitSafeStart();
+    
 
     // Unique device instructions
     unsigned int driveGetVoltage(unsigned char device);
     unsigned int driveGetTemp(unsigned char device);
-    void driveSetSpeed(int speed, unsigned char device);
+    void driveSetSpeed(int percentage, unsigned char device);
     
       
     /* -------------- Arm motor controllers -------------- */

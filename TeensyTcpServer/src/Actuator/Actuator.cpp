@@ -16,9 +16,9 @@ Actuator::Actuator(char reset, char error){
 	_errPin = error;
 }
 
-// Utility methods/Functions -----------------
+//* Utility methods/Functions -----------------
 
-void Actuator::motorConfigureAndReset(){
+void Actuator::controllerConfigureReset(){
 	// Starts serial comms with the SMC
 	Serial3.begin(9600);
 	// briefly reset SMC when Arduino starts up (optional)
@@ -33,90 +33,94 @@ void Actuator::motorConfigureAndReset(){
 	// Requires to identify baudrate
 	Serial3.write(0xAA); // send baud-indicator byte
 	// clear the safe-start violation and let the motor run
-	motorExitSafeStart();
+	controllerExitSafeStart();
 }
 // Used to read incoming information from the SMC
-int Actuator::motorReadByte(){
+int Actuator::controllerReadByte(){
 	char c;
 	if(Serial3.readBytes(&c, 1) == 0){ return -1; }
 	return (byte)c;
 }
 // Used to get different variables from a specific motor
-unsigned int Actuator::motorGetVariable(unsigned char variableID, unsigned char device){
+unsigned int Actuator::controllerGetVariable(unsigned char variableID, unsigned char device){
 	Serial3.write(0xAA);
 	Serial3.write(device);
 	Serial3.write(0x21);
 	Serial3.write(variableID);
-	return motorReadByte() + 256 * motorReadByte();
+	return controllerReadByte() + 256 * controllerReadByte();
 }
 
-// Methods/Functions for multi-device actions ------------
+//* Methods/Functions for multi-device actions ------------
 
 // Sets all motors at one side to said speed
-void Actuator::motorSetAllSpeed(int speedLeft, int speedRight){
+void Actuator::driveSetAllSpeed(int speedLeft, int speedRight){
 	for(int i = 0; i < 3; i++){
-		motorSetSpeed(speedLeft, i);
+		driveSetSpeed(speedLeft, i);
 		delay(5); // Is it needed?
 	}
 	for(int i = 3; i < 6; i++){
-		motorSetSpeed(-speedRight, i);
+		driveSetSpeed(-speedRight, i);
 		delay(5); // Is it needed?
 	}
 }
 
 // Returns avg voltage of all SMC at the rover
-unsigned int Actuator::motorGetAvgVoltage(){
+unsigned int Actuator::driveGetAvgVoltage(){
 	unsigned int avg = 0;
 	for(int i=0; i < 8; i++){
-		avg += motorGetVariable(INPUT_VOLTAGE, i);
+		avg += controllerGetVariable(INPUT_VOLTAGE, i);
 		delay(1); // Is it needed?
 	}
 	return avg/8;
 }
 
 // Returns the average temperature of all SMC
-unsigned int Actuator::motorGetAvgTemp(){
+unsigned int Actuator::driveGetAvgTemp(){
 	unsigned int avg = 0;
 	for(int i=0; i < 8; i++){
-		avg += motorGetVariable(TEMPERATURE, i);
+		avg += controllerGetVariable(TEMPERATURE, i);
 		delay(1); // Is it needed?
 	}
 	return avg/8;
 }
 
 // Returns value of ERR pin 
-bool Actuator::motorGetError(){
+bool Actuator::driveGetError(){
 	return digitalRead(_errPin);
 }
 
 // Starts SMCs
-void Actuator::motorExitSafeStart(){
+void Actuator::controllerExitSafeStart(){
 	Serial3.write(0x83);
 }
 
 
 // Methods/Functions for unique devices ------------------
 // Gets voltage for unique SMC
-unsigned int Actuator::motorGetVoltage(unsigned char device){
-	return motorGetVariable(INPUT_VOLTAGE, device);
+unsigned int Actuator::driveGetVoltage(unsigned char device){
+	return controllerGetVariable(INPUT_VOLTAGE, device);
 }
 
 // Gets temperature for unique SMC
-unsigned int Actuator::motorGetTemp(unsigned char device){
-	return motorGetVariable(TEMPERATURE, device);
+unsigned int Actuator::driveGetTemp(unsigned char device){
+	return controllerGetVariable(TEMPERATURE, device);
 }
 
 // Sets SMC individual speed
-void Actuator::motorSetSpeed(int speed, unsigned char device){
+void Actuator::driveSetSpeed(int percentage, unsigned char device){
 	Serial3.write(0xAA);
 	Serial3.write(device);
-	if (speed < 0){
+	if (percentage < 0){
 		Serial3.write(0x06); // motor reverse command
-		speed = -speed; // make speed positive
+		percentage = -percentage; // make speed positive
 	}
 	else{
 		Serial3.write(0x05); // motor forward command
 	}
+	/*
 	Serial3.write(speed & 0x1F);
 	Serial3.write(speed >> 5);
+	*/
+	Serial3.write(0x00);
+	Serial3.write(percentage);
 }

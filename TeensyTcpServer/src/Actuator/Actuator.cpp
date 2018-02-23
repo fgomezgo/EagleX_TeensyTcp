@@ -124,3 +124,25 @@ void Actuator::driveSetSpeed(int percentage, unsigned char device){
 	Serial3.write(0x00);
 	Serial3.write(percentage);
 }
+
+
+
+void Actuator::shoulderRotate(bool direction){
+	if(direction){
+		driveSetSpeed(20, 6);
+	}else{
+		driveSetSpeed(-20, 6);
+	}
+	delay(100);
+	driveSetSpeed(0, 6);
+}
+
+void Actuator::elbowRotate(bool direction){
+	if(direction){
+		driveSetSpeed(20, 7);
+	}else{
+		driveSetSpeed(-20, 7);
+	}
+	delay(100);
+	driveSetSpeed(0, 7);
+}

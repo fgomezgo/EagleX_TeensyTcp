@@ -40,8 +40,8 @@ class Actuator{
     void baseRotate(bool heading);
 
     //TODO: Main idea is to use a closed loop system for shoulder position
-    void shoulderRotate(int position);
-    void elbowRotate(int position);
+    void shoulderRotate(bool direction);
+    void elbowRotate(bool direction);
 
     /* -------------- Gripper motor controllers -------------- */
     //TODO: Same as above // Controls the servo

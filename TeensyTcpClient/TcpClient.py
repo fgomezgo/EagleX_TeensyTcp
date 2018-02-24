@@ -86,19 +86,17 @@ class RoverComms():
             rospy.loginfo("self.but5")
 
         if self.joy1_old != self.joy1:
-            rospy.loginfo("left")
             self.joy1_change = 1
             self.joy1_old = self.joy1
 
         if self.joy2_old != self.joy2:
-            rospy.loginfo(self.joy2)
             self.joy2_change = 1
             self.joy2_old = self.joy2
         
         if self.joy1_change == 1 or self.joy2_change == 1:
-            rospy.loginfo("cambio")
             leftSide = 0
             rightSide = 0
+            rospy.loginfo("Drive system = Left: %s Right: %s", self.joy1, self.joy2)
             data = bytearray([0x00,0x00,0x00])
             if self.joy1 > 0:
                 leftSide = self.joy1

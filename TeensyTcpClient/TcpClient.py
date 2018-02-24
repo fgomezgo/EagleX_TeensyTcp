@@ -64,9 +64,20 @@ class RoverComms():
             rospy.loginfo("self.but2")
 
         if self.but4 ==1:
-            data = bytearray([0x00,0x00,0x02,0x07])
+            data = bytearray([0x00,0x00,0x01,0x07])
             self.socket.sendto(data, self.address) #send command to arduino
             rospy.loginfo("self.but4")
+
+        if self.but3 == 1:
+            data = bytearray([0x00,0x00,0x00,0x08])
+            self.socket.sendto(data, self.address) #send command to arduino
+            rospy.loginfo("self.but3")
+
+        if self.but5 ==1:
+            data = bytearray([0x00,0x00,0x01,0x08])
+            self.socket.sendto(data, self.address) #send command to arduino
+            rospy.loginfo("self.but5")
+
         """
         #print type(data)
         self.socket.sendto(data, self.address) #send command to arduino

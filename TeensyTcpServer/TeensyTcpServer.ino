@@ -6,7 +6,9 @@ byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEE}; //Assign a mac address
 IPAddress ip(192, 168, 1, 200); //Assign my IP adress
 unsigned int localPort = 5000; //Assign a Port to talk over
 unsigned int request;
+byte header;
 
+unsigned int instruction;
 String datReq; //String for our data
 Comms comms(ip, mac, localPort);      //  Ethernet module object
 Location location(1);                 // GPS module object
@@ -45,8 +47,13 @@ void loop() {
 	switch(cState){
 		case IDLE:
 			if(comms.available()){   // If data is at socket
-				//Serial.println(comms.read(),HEX);
-				switch(comms.read()){  // Read data and send to device 
+				//? Thought this was easier to understand 
+				//? Reads, parses header and stores request
+				request = comms.read();
+				header = request & 0xFF;
+				request = request >> 8;
+
+				switch(header){  // Toggle state according to header
 					case 0x19:
 						cState = LOC_LAT;
 						break;
@@ -54,12 +61,10 @@ void loop() {
 						cState = LOC_LON;
 						break;
 					case 0x07:
-						Serial.println("Abajo");
-						actuator.shoulderRotate(false);
+						cState = ACT_ARM_SH;
 						break;
-					case 0x207:
-						Serial.println("Arriba");
-						actuator.shoulderRotate(true);
+					case 0x08:
+						cState = ACT_ARM_EL;
 						break;
 				}
 			}else{
@@ -88,6 +93,16 @@ void loop() {
 			}else{
 				cState = LOC_NO_FIX;
 			}
+			break;
+
+		case ACT_ARM_SH:	// Rotates sholder in direction of request
+			actuator.shoulderRotate(request);
+			cState = IDLE;
+			break;
+
+		case ACT_ARM_EL:	// Rotates elbow in direction of request
+			actuator.elbowRotate(request);
+			cState = IDLE;
 			break;
 
 		case LOC_NO_FIX:  // If there is no FIX send error to host

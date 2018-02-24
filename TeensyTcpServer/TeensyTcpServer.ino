@@ -24,6 +24,7 @@ typedef enum{
 	LOC_NO_FIX,
 	ACT_ARM_SH,
 	ACT_ARM_EL,
+	ACT_DRIVE_ALL_SP,
 	TEST,
 }ServerStates;
 
@@ -37,8 +38,7 @@ void setup() {
 	actuator.controllerConfigureReset();
 
 	//actuator.motorSetSpeed(3200,3);
-	actuator.driveSetAllSpeed(3200, -3200);
-
+	//actuator.driveSetAllSpeed(3200, -3200);
 	//Set next state
 	cState = IDLE;
 }
@@ -52,8 +52,10 @@ void loop() {
 				request = comms.read();
 				header = request & 0xFF;
 				request = request >> 8;
-
 				switch(header){  // Toggle state according to header
+					case 0x00:
+						cState = ACT_DRIVE_ALL_SP;
+						break;
 					case 0x19:
 						cState = LOC_LAT;
 						break;
@@ -71,7 +73,30 @@ void loop() {
 				cState = LOC_GET;
 			}
 			break;
+		case ACT_DRIVE_ALL_SP:
+			int leftSide,rightSide;
+			request = request >> 8;  //? Why?
+			
+			rightSide =  request & 0xFF;
+			leftSide = request >> 8;
+			if (rightSide >> 7){
+				rightSide = rightSide & 0x7F;
+				rightSide = -rightSide;
+			}
+			if (leftSide >> 7){
+				leftSide = leftSide & 0x7F;
+				leftSide = -leftSide;
+			}
+			Serial.print("left: ");
+			Serial.print(leftSide);
+			Serial.print(" ");
+			Serial.print("right: ");
+			Serial.print(rightSide);
+			Serial.println();
 
+			actuator.driveSetAllSpeed(leftSide, rightSide);
+			cState = IDLE;
+			break;
 		case LOC_GET:   // Gets updated data from GPS when no requests  are present
 			location.updateData();
 			cState = IDLE;

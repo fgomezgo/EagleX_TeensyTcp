@@ -117,15 +117,9 @@ void Actuator::driveSetSpeed(int percentage, unsigned char device){
 	else{
 		Serial3.write(0x05); // motor forward command
 	}
-	/*
-	Serial3.write(speed & 0x1F);
-	Serial3.write(speed >> 5);
-	*/
 	Serial3.write(0x00);
 	Serial3.write(percentage);
 }
-
-
 
 void Actuator::shoulderRotate(bool direction){
 	if(direction){

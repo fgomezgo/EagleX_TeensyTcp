@@ -45,6 +45,13 @@ class RoverComms():
         self.but3 = 0 
         self.but4 = 0 
         self.but5 = 0 
+        self.joy1 = 0
+        self.joy2 = 0
+
+        self.joy1_change = 0
+        self.joy2_change = 0
+        self.joy1_old = 0
+        self.joy2_old = 0
         ###### main loop  ######
         while not rospy.is_shutdown():
             self.synch()
@@ -77,6 +84,40 @@ class RoverComms():
             data = bytearray([0x00,0x00,0x01,0x08])
             self.socket.sendto(data, self.address) #send command to arduino
             rospy.loginfo("self.but5")
+
+        if self.joy1_old != self.joy1:
+            rospy.loginfo("left")
+            self.joy1_change = 1
+            self.joy1_old = self.joy1
+
+        if self.joy2_old != self.joy2:
+            rospy.loginfo(self.joy2)
+            self.joy2_change = 1
+            self.joy2_old = self.joy2
+        
+        if self.joy1_change == 1 or self.joy2_change == 1:
+            rospy.loginfo("cambio")
+            leftSide = 0
+            rightSide = 0
+            data = bytearray([0x00,0x00,0x00])
+            if self.joy1 > 0:
+                leftSide = self.joy1
+            else:
+                leftSide = - self.joy1
+                leftSide = leftSide | (1 << 7)
+            
+            if self.joy2 > 0:
+                rightSide = self.joy2
+            else:
+                rightSide = - self.joy2
+                rightSide = rightSide | (1 << 7)
+
+            data = bytearray([leftSide, rightSide, 0x00])
+
+            self.socket.sendto(data, self.address) #send command to arduino
+
+            self.joy1_change = 0
+            self.joy2_change = 0
 
         """
         #print type(data)
@@ -129,6 +170,8 @@ class RoverComms():
         self.but3 = data.buttons[2]
         self.but4 = data.buttons[3]
         self.but5 = data.buttons[4]
+        self.joy1 = int(round(data.axes[2] * 100))
+        self.joy2 = int(round(data.axes[4] * 100))
 
         
     

@@ -123,9 +123,9 @@ void Actuator::driveSetSpeed(int percentage, unsigned char device){
 
 void Actuator::shoulderRotate(bool direction){
 	if(direction){
-		driveSetSpeed(40, 6);
+		driveSetSpeed(40, 7);
 	}else{
-		driveSetSpeed(-40, 6);
+		driveSetSpeed(-40, 7);
 	}
 	delay(200);
 	driveSetSpeed(0, 6);
@@ -133,9 +133,9 @@ void Actuator::shoulderRotate(bool direction){
 
 void Actuator::elbowRotate(bool direction){
 	if(direction){
-		driveSetSpeed(40, 7);
+		driveSetSpeed(40, 8);
 	}else{
-		driveSetSpeed(-40, 7);
+		driveSetSpeed(-40, 8);
 	}
 	delay(200);
 	driveSetSpeed(0, 7);

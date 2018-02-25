@@ -128,7 +128,7 @@ void Actuator::shoulderRotate(bool direction){
 		driveSetSpeed(-40, 7);
 	}
 	delay(200);
-	driveSetSpeed(0, 6);
+	driveSetSpeed(0, 7);
 }
 
 void Actuator::elbowRotate(bool direction){
@@ -138,5 +138,5 @@ void Actuator::elbowRotate(bool direction){
 		driveSetSpeed(-40, 8);
 	}
 	delay(200);
-	driveSetSpeed(0, 7);
+	driveSetSpeed(0, 8);
 }

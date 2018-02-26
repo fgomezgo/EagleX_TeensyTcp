@@ -75,7 +75,7 @@ void loop() {
 			break;
 		case ACT_DRIVE_ALL_SP:
 			int leftSide,rightSide;
-			request = request >> 8;  //? Why?
+			//request = request >> 8;  //? Why?
 			
 			rightSide =  request & 0xFF;
 			leftSide = request >> 8;

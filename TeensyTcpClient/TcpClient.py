@@ -97,7 +97,7 @@ class RoverComms():
             leftSide = 0
             rightSide = 0
             rospy.loginfo("Drive system = Left: %s Right: %s", self.joy1, self.joy2)
-            data = bytearray([0x00,0x00,0x00])
+            data = bytearray([0x00, 0x00,0x00,0x00])
             if self.joy1 > 0:
                 leftSide = self.joy1
             else:
@@ -110,7 +110,7 @@ class RoverComms():
                 rightSide = - self.joy2
                 rightSide = rightSide | (1 << 7)
 
-            data = bytearray([leftSide, rightSide, 0x00])
+            data = bytearray([0x00, leftSide, rightSide, 0x00])
 
             self.socket.sendto(data, self.address) #send command to arduino
 

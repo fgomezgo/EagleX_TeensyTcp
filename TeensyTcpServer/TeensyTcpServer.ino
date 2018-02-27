@@ -1,6 +1,7 @@
 #include "src/Comms/Comms.h"
 #include "src/Location/Location.h"
 #include "src/Actuator/Actuator.h"
+#include "src/Feedback/Feedback.h"
 
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEE}; //Assign a mac address
 IPAddress ip(192, 168, 1, 200); //Assign my IP adress
@@ -14,6 +15,9 @@ Comms comms(ip, mac, localPort);      //  Ethernet module object
 Location location(1);                 // GPS module object
 Actuator actuator(5,6);                     // configure SMC  reset and  error pins
 
+char LIS3DH_CS[4] = {20, 21, 22, 23};		//IMU
+Feedback feedback(LIS3DH_CS, 0, 1, 32);
+
 // States
 typedef enum{
 	IDLE,     // Awaits for communication  and gets the id
@@ -24,8 +28,13 @@ typedef enum{
 	ACT_WRIST_PITCH,		//? Wrist Controllers
 	ACT_WRIST_ROLL,
 	ACT_GRIPPER_ROLL,		//? Gripper Controller
-	ACT_COOLING_SET,
-	LOC_UPDATE,
+	ACT_COOLING_SET,		//? Cooling System
+	FEE_UPD_SUSPS,			//? IMU
+	FEE_GET_SUSP1,
+	FEE_GET_SUSP2,
+	FEE_GET_SUSP3,
+	FEE_GET_SUSP4,
+	LOC_UPDATE,				//? Location
 	LOC_GET_LAT,
 	LOC_GET_LON,
 	LOC_NO_FIX,
@@ -40,6 +49,12 @@ void setup() {
 	comms.start();
 	location.moduleConfigure();
 	actuator.controllerConfigureReset();
+	if(feedback.suspensionImuConf()){
+		Serial.println("ERROR: Accelerometer intitialization");
+	}else{
+		Serial.println("MSG: Accelerometers detected");
+	}
+
 	//Set next state
 	cState = IDLE;
 }
@@ -58,7 +73,7 @@ void loop() {
 						cState = ACT_DRIVE_ALL_SP;		//? SET left and right speed 
 						break;
 					case 0x07:
-						cState = ACT_ARM_SH_YAW; 		
+						cState = ACT_ARM_SH_YAW; 		//? Arm controllers
 						break;
 					case 0x08:
 						cState = ACT_ARM_SH_PITCH; 		
@@ -76,10 +91,22 @@ void loop() {
 						cState = ACT_GRIPPER_ROLL; 		
 						break;
 					case 0x0D:
-						cState = ACT_COOLING_SET;
+						cState = ACT_COOLING_SET;	//? Cooling System
+						break;
+					case 0x0E:
+						cState = FEE_GET_SUSP1;		//? IMU
+						break;
+					case 0x4E:
+						cState = FEE_GET_SUSP2;
+						break;
+					case 0x8E:
+						cState = FEE_GET_SUSP3;
+						break;
+					case 0xCE:
+						cState = FEE_GET_SUSP4;
 						break;
 					case 0x11:
-						cState = LOC_GET_LAT;
+						cState = LOC_GET_LAT;		//? Location
 						break;
 					case 0x51:
 						cState = LOC_GET_LON;
@@ -157,9 +184,34 @@ void loop() {
 			cState = IDLE;
 			break;
 
+		case FEE_UPD_SUSPS:
+			feedback.suspensionImuUpdate();
+			cState = IDLE;
+			break;
+
+		case FEE_GET_SUSP1:
+			comms.writePrecision(feedback.getSuspensionRB(),5);
+			cState = IDLE;
+			break;
+
+		case FEE_GET_SUSP2:
+			comms.writePrecision(feedback.getSuspensionRF(),5);
+			cState = IDLE;
+			break;
+
+		case FEE_GET_SUSP3:
+			comms.writePrecision(feedback.getSuspensionLF(),5);
+			cState = IDLE;
+			break;
+
+		case FEE_GET_SUSP4:
+			comms.writePrecision(feedback.getSuspensionLB(),5);
+			cState = IDLE;
+			break;
+
 		case LOC_UPDATE:   // Gets updated data from GPS when no requests  are present
 			location.updateData();
-			cState = IDLE;
+			cState = FEE_UPD_SUSPS;
 			break;
 
 		case LOC_GET_LAT:   // Gets latitude from GPS module and returns to client

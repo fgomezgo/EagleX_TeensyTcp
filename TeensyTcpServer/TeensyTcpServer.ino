@@ -48,7 +48,9 @@ void setup() {
 
 	comms.start();
 	location.moduleConfigure();
+	delay(1000);
 	actuator.controllerConfigureReset();
+
 	if(feedback.suspensionImuConf()){
 		Serial.println("ERROR: Accelerometer intitialization");
 	}else{
@@ -211,12 +213,13 @@ void loop() {
 
 		case LOC_UPDATE:   // Gets updated data from GPS when no requests  are present
 			location.updateData();
-			cState = FEE_UPD_SUSPS;
+			cState = IDLE;
 			break;
 
 		case LOC_GET_LAT:   // Gets latitude from GPS module and returns to client
-			//Serial.println(location.getFix());
+			
 			if(location.getFix()){
+				Serial.println("Latitude sent");
 				comms.writePrecision(location.getLatitude(),5);
 				cState = IDLE;
 			}else{
@@ -225,8 +228,8 @@ void loop() {
 			break;
 
 		case LOC_GET_LON:   // Gets longitude from GPS module and returns to client
-			//Serial.println(location.getFix());
 			if(location.getFix()){
+				Serial.println("Longitude sent");
 				comms.writePrecision(location.getLongitude(),5);
 				cState = IDLE;
 			}else{

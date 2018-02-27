@@ -22,9 +22,13 @@ typedef enum{
 	LOC_LAT,
 	LOC_LON,
 	LOC_NO_FIX,
-	ACT_ARM_SH,
-	ACT_ARM_EL,
-	ACT_DRIVE_ALL_SP,
+	ACT_DRIVE_ALL_SP,		//? Drive System Controllers
+	ACT_ARM_SH_YAW,			//? ARM Controllers
+	ACT_ARM_SH_PITCH,
+	ACT_ARM_EL_PITCH,
+	ACT_WRIST_PITCH,		//? Wrist Controllers
+	ACT_WRIST_ROLL,
+	ACT_GRIPPER_ROLL,		//? Gripper Controller
 	TEST,
 }ServerStates;
 
@@ -34,11 +38,8 @@ void setup() {
 	Serial.begin(9600); //Turn on Serial Port
 
 	comms.start();
-	location.moduleConfigure();
+	//location.moduleConfigure();
 	actuator.controllerConfigureReset();
-
-	//actuator.motorSetSpeed(3200,3);
-	//actuator.driveSetAllSpeed(3200, -3200);
 	//Set next state
 	cState = IDLE;
 }
@@ -52,27 +53,34 @@ void loop() {
 				request = comms.read();
 				header = request & 0xFF;
 				request = request >> 8;
-				switch(header){  // Toggle state according to header
+				switch(header){  
 					case 0x00:
-						cState = ACT_DRIVE_ALL_SP;
-						break;
-					case 0x19:
-						cState = LOC_LAT;
-						break;
-					case 0x1A:
-						cState = LOC_LON;
+						cState = ACT_DRIVE_ALL_SP;		//? SET left and right speed 
 						break;
 					case 0x07:
-						cState = ACT_ARM_SH;
+						cState = ACT_ARM_SH_YAW; 		
 						break;
 					case 0x08:
-						cState = ACT_ARM_EL;
+						cState = ACT_ARM_SH_PITCH; 		
+						break;
+					case 0x09:
+						cState = ACT_ARM_EL_PITCH; 		
+						break;
+					case 0x0A:
+						cState = ACT_WRIST_PITCH; 		
+						break;
+					case 0x0B:
+						cState = ACT_WRIST_ROLL; 		
+						break;
+					case 0x0C:
+						cState = ACT_GRIPPER_ROLL; 		
 						break;
 				}
 			}else{
-				cState = LOC_GET;
+				//! cState = LOC_GET;
 			}
 			break;
+
 		case ACT_DRIVE_ALL_SP:
 			int leftSide,rightSide;
 			
@@ -96,6 +104,37 @@ void loop() {
 			actuator.driveSetAllSpeed(leftSide, rightSide);
 			cState = IDLE;
 			break;
+		
+		case ACT_ARM_SH_YAW:
+			actuator.shoulderYaw(request);
+			cState = IDLE;
+			break;
+		
+		case ACT_ARM_SH_PITCH:
+			actuator.shoulderPitch(request);
+			cState = IDLE;
+			break;
+
+		case ACT_ARM_EL_PITCH:
+			actuator.elbowPitch(request);
+			cState = IDLE;
+			break;
+
+		case ACT_WRIST_PITCH:
+			actuator.wristPitch(request);
+			cState = IDLE;
+			break;
+
+		case ACT_WRIST_ROLL:
+			actuator.wristRoll(request);
+			cState = IDLE;
+			break;
+
+		case ACT_GRIPPER_ROLL:
+			actuator.gripperRoll(request);
+			cState = IDLE;
+			break;
+
 		case LOC_GET:   // Gets updated data from GPS when no requests  are present
 			location.updateData();
 			cState = IDLE;
@@ -117,16 +156,6 @@ void loop() {
 			}else{
 				cState = LOC_NO_FIX;
 			}
-			break;
-
-		case ACT_ARM_SH:	// Rotates sholder in direction of request
-			actuator.shoulderRotate(request);
-			cState = IDLE;
-			break;
-
-		case ACT_ARM_EL:	// Rotates elbow in direction of request
-			actuator.elbowRotate(request);
-			cState = IDLE;
 			break;
 
 		case LOC_NO_FIX:  // If there is no FIX send error to host

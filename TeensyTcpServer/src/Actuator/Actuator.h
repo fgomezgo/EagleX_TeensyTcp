@@ -24,6 +24,8 @@ class Actuator{
 
     // Multidevice instructions
     void driveSetAllSpeed(int speedLeft, int speedRight);
+
+    //TODO Implement  separate functions for drive system temps and arm
     unsigned int driveGetAvgVoltage();
     unsigned int driveGetAvgTemp();
     bool driveGetError();
@@ -36,26 +38,26 @@ class Actuator{
     
       
     /* -------------- Arm motor controllers -------------- */
-    //TODO: will a delay work good enough?
-    void baseRotate(bool heading);
+    //?: delay works good enough!
+    void shoulderYaw(bool direction);
+    void shoulderPitch(bool direction);
 
-    //TODO: Main idea is to use a closed loop system for shoulder position
-    void shoulderRotate(bool direction);
-    void elbowRotate(bool direction);
+    void elbowPitch(bool direction);
 
-    /* -------------- Gripper motor controllers -------------- */
-    //TODO: Same as above // Controls the servo
-    void forearmRotate(int position);
-    //TODO: Same as above
-    void wristRotate(int position);
-    //TODO: Control it with the tiny wheel thingy
-    void gripperMove(bool direction);
+    /* -------------- Wrist Controller -------------- */
+    void wristPitch(bool direction);
+    void wristRoll(bool direction);
+
+    /* -------------- Gripper Controller -------------- */
+    void gripperRoll(bool direction);
+
 
     /* -------------- Cooling System -------------- */
     //TODO: Plan is to send byte with fans states encoded?
     void coolingSet(char config);
 
   private:
+    //TODO: Method for setting controller power [%]
     char _resetPin;
     char _errPin;
 

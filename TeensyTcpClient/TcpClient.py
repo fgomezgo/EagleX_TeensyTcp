@@ -41,7 +41,7 @@ class RoverComms():
     #############################################################
         r = rospy.Rate(self.rate)
         self.navsat = NavSatFix()
-
+        """ Drive System Controllers """
         # Left drive system Controllers [0 - 2]
         self.joyL = 0
         self.joyL_old = 0
@@ -50,6 +50,7 @@ class RoverComms():
         self.joyR = 0
         self.joyR_old = 0
         self.joyR_change = 0
+        """ ARM controllers """
         # Shoulder YAW  Controller 6
         self.PLaR = 0
         # Shoulder PITCH Controller 7
@@ -58,6 +59,7 @@ class RoverComms():
         #  Elbow PITCH Controller 8
         self.R1 = 0
         self.R2 = 0
+        """ Gripper Controllers """
         # Wrist PITCH Servo
         self.PUaD = 0
         # Wrist ROLL (Drill) Controller 9
@@ -174,12 +176,12 @@ class RoverComms():
 
         """ Gripper ROLL """
         if self.TR == 1:
-            data = bytearray([0x00,0x00,0x00,0x0B])
+            data = bytearray([0x00,0x00,0x00,0x0C])
             self.socket.sendto(data, self.address) #send command to arduino
             rospy.loginfo("INFO: Gripper moving: OPENING")
 
         if self.CR == 1:
-            data = bytearray([0x00,0x00,0x01,0x0B])
+            data = bytearray([0x00,0x00,0x01,0x0C])
             self.socket.sendto(data, self.address) #send command to arduino
             rospy.loginfo("INFO: Gripper moving: CLOSING")
 

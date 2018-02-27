@@ -121,7 +121,18 @@ void Actuator::driveSetSpeed(int percentage, unsigned char device){
 	Serial3.write(percentage);
 }
 
-void Actuator::shoulderRotate(bool direction){
+/* -------------- Arm motor controllers -------------- */
+void Actuator::shoulderYaw(bool direction){
+	if(direction){
+		driveSetSpeed(40, 6);
+	}else{
+		driveSetSpeed(-40, 6);
+	}
+	delay(200);
+	driveSetSpeed(0, 6);
+}
+
+void Actuator::shoulderPitch(bool direction){
 	if(direction){
 		driveSetSpeed(40, 7);
 	}else{
@@ -131,7 +142,7 @@ void Actuator::shoulderRotate(bool direction){
 	driveSetSpeed(0, 7);
 }
 
-void Actuator::elbowRotate(bool direction){
+void Actuator::elbowPitch(bool direction){
 	if(direction){
 		driveSetSpeed(40, 8);
 	}else{
@@ -139,4 +150,31 @@ void Actuator::elbowRotate(bool direction){
 	}
 	delay(200);
 	driveSetSpeed(0, 8);
+}
+
+/* -------------- Wrist Controller -------------- */
+void Actuator::wristPitch(bool direction){
+	//TODO implement servo logic
+}
+
+void Actuator::wristRoll(bool direction){
+	if(direction){
+		driveSetSpeed(40, 9);
+	}else{
+		driveSetSpeed(-40, 9);
+	}
+	delay(200);
+	driveSetSpeed(0, 9);
+}
+
+
+/* -------------- Gripper Controller -------------- */
+void Actuator::gripperRoll(bool direction){
+	if(direction){
+		driveSetSpeed(40, 10);
+	}else{
+		driveSetSpeed(-40, 10);
+	}
+	delay(200);
+	driveSetSpeed(0, 10);
 }

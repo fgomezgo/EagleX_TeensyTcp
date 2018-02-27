@@ -1,5 +1,5 @@
 <launch>
-
+  
   <arg name="model" />
   <arg name="gui" default="true" />
   <arg name="rvizconfig" default="$(find model)/rviz/urdf.rviz" />
@@ -14,6 +14,37 @@
   </node>
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+
+  <env name="ROSCONSOLE_FORMAT" value="[${thread}] [${node}/${function}:${line}]: ${message}"/>
+
+  <arg name="print_profile_data" default="false"/>
+
+  <node pkg="mapviz" type="mapviz" name="$(anon mapviz)" required="true">
+    <param name="print_profile_data" value="$(arg print_profile_data)"/>
+  </node>
+
+  <node pkg="swri_transform_util" type="initialize_origin.py" name="initialize_origin" >
+    <param name="local_xy_frame" value="/far_field"/>
+    <param name="local_xy_origin" value="swri"/>
+    <rosparam param="local_xy_origins">
+    <!-- Coordinates for ITESM building 2 -->
+      [{ name: swri,
+         latitude: 20.614599,
+         longitude: -100.402970,
+         altitude: 233.719,
+         heading: 0.0}]
+    </rosparam>
+  </node>
+
+  <node pkg="tf" type="static_transform_publisher" name="swri_transform" args="0 0 0 0 0 0 /far_field /origin 100"  />
+
+  <!-- Needed only for searching for services -->
+  <node pkg="rosapi" type="rosapi_node" name="rosapi"/>
+
   
+  
+  <node pkg = "joy" type = "joy_node" name = "joy">
+    <param name="dev" type="string" value="/dev/input/js1" />
+  </node>
 
 </launch>

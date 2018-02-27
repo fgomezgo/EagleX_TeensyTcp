@@ -1,0 +1,147 @@
+<?xml version="1.0"?>
+<robot name="rover">
+
+  <material name="gray">
+    <color rgba="0.7 0.7 0.7 5"/>
+  </material>
+  <material name="black">
+    <color rgba="0.2 0.2 0.2 2"/>
+  </material>
+  <material name="chasis">
+    <color rgba="0.4 0 0 2"/>
+  </material>
+  <material name="joint">
+    <color rgba="0.4 0 0 2"/>
+  </material>
+
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="0.0001 0.0001 0.000033"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="base_pitch">
+    <visual>
+      <geometry>
+        <box size="0.0001 0.0001 0.000033"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="base_roll">
+    <visual>
+      <geometry>
+        <box size="0.0001 0.0001 0.000033"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="base_link_to_base_pitch" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="1000.0" lower="-7" upper="7" velocity=".1"/>
+    <parent link="base_link"/>
+    <child link="base_pitch"/>
+    <origin xyz="0 0 -.000033"/>
+  </joint>
+
+  <joint name="base_pitch_to_base_roll" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-0.6" upper="0.6" velocity=".1"/>
+    <parent link="base_pitch"/>
+    <child link="base_roll"/>
+    <origin xyz="0 0 -.000066"/>
+  </joint>
+  
+  <link name="chasis">
+    <visual>
+      <geometry>
+        <mesh filename="package://model/meshes/chasis.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="1.5708 0 0" xyz="-1.08 0.524 -4.175"/>
+      <material name="gray"/>
+    </visual>
+  </link>
+
+  <joint name="base_roll_to_chasis" type="revolute">
+    <axis xyz="1 0 0"/>
+    <limit effort="1000.0" lower="-0.6" upper="0.6" velocity=".1"/>
+    <parent link="base_roll"/>
+    <child link="chasis"/>
+    <origin xyz="0 0 -0.0001"/>
+  </joint>
+  
+  <link name="right">
+    <visual>
+      <geometry>
+        <mesh filename="package://model/meshes/boogie1.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="1.5708 0 0" xyz="-0.888 0.846 -4.165"/>
+      <material name="gray"/>
+    </visual>
+  </link>
+
+  <link name="left">
+    <visual>
+      <geometry>
+        <mesh filename="package://model/meshes/boogie2.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="1.5708 0 0" xyz="-0.888 0.202 -4.165"/>
+      <material name="gray"/>
+    </visual>
+  </link>
+
+  <link name="right2">
+    <visual>
+      <geometry>
+        <mesh filename="package://model/meshes/rocker1.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="1.5708 0 3.1416" xyz="1.275 -0.232 -4.165"/>
+      <material name="gray"/>
+    </visual>
+  </link>
+
+  <link name="left2">
+    <visual>
+      <geometry>
+        <mesh filename="package://model/meshes/rocker2.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="1.5708 0 3.1416" xyz="1.275 -0.817 -4.165"/>
+      <material name="gray"/>
+    </visual>
+  </link>
+  
+   <joint name="chasis_to_right" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-0.6" upper="0.6" velocity=".1"/>
+    <parent link="chasis"/>
+    <child link="right"/>
+    <origin xyz="0.195 -0.282 -.012"/>
+  </joint>
+
+  <joint name="chasis_to_right2" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-0.6" upper="0.6" velocity=".1"/>
+    <parent link="chasis"/>
+    <child link="right2"/>
+    <origin xyz="-0.195 -0.312 -.012"/>
+  </joint>
+
+  <joint name="chasis_to_left" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-0.6" upper="0.6" velocity=".1"/>
+    <parent link="chasis"/>
+    <child link="left"/>
+    <origin xyz="0.195 0.282 -.012"/>
+  </joint>
+
+  <joint name="chasis_to_left2" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-0.6" upper="0.6" velocity=".1"/>
+    <parent link="chasis"/>
+    <child link="left2"/>
+    <origin xyz="-0.195 0.312 -.012"/>
+  </joint>
+
+</robot>

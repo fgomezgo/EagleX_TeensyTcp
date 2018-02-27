@@ -17,11 +17,6 @@ Actuator actuator(5,6);                     // configure SMC  reset and  error p
 // States
 typedef enum{
 	IDLE,     // Awaits for communication  and gets the id
-	LOCATION,
-	LOC_GET,
-	LOC_LAT,
-	LOC_LON,
-	LOC_NO_FIX,
 	ACT_DRIVE_ALL_SP,		//? Drive System Controllers
 	ACT_ARM_SH_YAW,			//? ARM Controllers
 	ACT_ARM_SH_PITCH,
@@ -29,6 +24,10 @@ typedef enum{
 	ACT_WRIST_PITCH,		//? Wrist Controllers
 	ACT_WRIST_ROLL,
 	ACT_GRIPPER_ROLL,		//? Gripper Controller
+	LOC_UPDATE,
+	LOC_GET_LAT,
+	LOC_GET_LON,
+	LOC_NO_FIX,
 	TEST,
 }ServerStates;
 
@@ -75,9 +74,15 @@ void loop() {
 					case 0x0C:
 						cState = ACT_GRIPPER_ROLL; 		
 						break;
+					case 0x11:
+						cState = LOC_GET_LAT;
+						break;
+					case 0x51:
+						cState = LOC_GET_LON;
+						break;
 				}
 			}else{
-				//! cState = LOC_GET;
+				cState = LOC_UPDATE;
 			}
 			break;
 
@@ -106,41 +111,47 @@ void loop() {
 			break;
 		
 		case ACT_ARM_SH_YAW:
+			Serial.println("Shoulder YAW");
 			actuator.shoulderYaw(request);
 			cState = IDLE;
 			break;
 		
 		case ACT_ARM_SH_PITCH:
+			Serial.println("Shoulder PITCH");
 			actuator.shoulderPitch(request);
 			cState = IDLE;
 			break;
 
 		case ACT_ARM_EL_PITCH:
+			Serial.println("Elbow PITCH");
 			actuator.elbowPitch(request);
 			cState = IDLE;
 			break;
 
 		case ACT_WRIST_PITCH:
+			Serial.println("Wrist PITCH");
 			actuator.wristPitch(request);
 			cState = IDLE;
 			break;
 
 		case ACT_WRIST_ROLL:
+			Serial.println("Wrist ROLL");
 			actuator.wristRoll(request);
 			cState = IDLE;
 			break;
 
 		case ACT_GRIPPER_ROLL:
+			Serial.println("Gripper ROLL");
 			actuator.gripperRoll(request);
 			cState = IDLE;
 			break;
 
-		case LOC_GET:   // Gets updated data from GPS when no requests  are present
+		case LOC_UPDATE:   // Gets updated data from GPS when no requests  are present
 			location.updateData();
 			cState = IDLE;
 			break;
 
-		case LOC_LAT:   // Gets latitude from GPS module and returns to client
+		case LOC_GET_LAT:   // Gets latitude from GPS module and returns to client
 			if(location.getFix()){
 				comms.writePrecision(location.getLatitude(),5);
 				cState = IDLE;
@@ -149,7 +160,7 @@ void loop() {
 			}
 			break;
 
-		case LOC_LON:   // Gets longitude from GPS module and returns to client
+		case LOC_GET_LON:   // Gets longitude from GPS module and returns to client
 			if(location.getFix()){
 				comms.writePrecision(location.getLongitude(),5);
 				cState = IDLE;

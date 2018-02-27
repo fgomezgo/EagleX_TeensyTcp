@@ -40,7 +40,7 @@ class RoverComms():
     def setup(self):
     #############################################################
         r = rospy.Rate(self.rate)
-        self.navsat = NavSatFix()
+        
         """ Drive System Controllers """
         # Left drive system Controllers [0 - 2]
         self.joyL = 0
@@ -68,6 +68,11 @@ class RoverComms():
         # Gripper ROLL (Finger) Controller 10
         self.TR = 0
         self.CR = 0
+        
+        """ Location variabels """
+        self.navsat = NavSatFix()
+        self.time_sec = 0
+        self.loc_flag = 0
 
         ###### main loop  ######
         while not rospy.is_shutdown():
@@ -185,7 +190,40 @@ class RoverComms():
             self.socket.sendto(data, self.address) #send command to arduino
             rospy.loginfo("INFO: Gripper moving: CLOSING")
 
+        ##################### Location #####################
+        if (rospy.Time.now().secs - self.time_sec) >= 1:
+            rospy.loginfo("INFO: Location: Query")
 
+            """ Get Latitude """
+            data = bytearray([0x00,0x00,0x00,0x11])
+            self.socket.sendto(data, self.address) #send command to arduino
+            try:
+                data, addr = self.socket.recvfrom(15) #Read response from arduino
+                if data == "-1":
+                    self.loc_flag = 1
+                else:
+                    self.navsat.latitude = float(data)
+                    #print data
+            except:
+                pass
+
+            """ Get Longitude """
+            data = bytearray([0x00,0x00,0x00,0x51])
+            self.socket.sendto(data, self.address) #send command to arduino
+            try:
+                data, addr = self.socket.recvfrom(15) #Read response from arduino
+                if data == "-1" or self.loc_flag == 1:
+                    rospy.loginfo("WARNING: No FIX, Dropping frame")
+                    self.loc_flag = 0
+                else:
+                    self.navsat.longitude = float(data)
+                    rospy.loginfo("INFO: Location: Recieved")
+                    #print data
+            except:
+                pass
+
+            self.time_sec = rospy.Time.now().secs
+        
         """
         #print type(data)
         self.socket.sendto(data, self.address) #send command to arduino

@@ -41,17 +41,32 @@ class RoverComms():
     #############################################################
         r = rospy.Rate(self.rate)
         self.navsat = NavSatFix()
-        self.but2 = 0 
-        self.but3 = 0 
-        self.but4 = 0 
-        self.but5 = 0 
-        self.joy1 = 0
-        self.joy2 = 0
 
-        self.joy1_change = 0
-        self.joy2_change = 0
-        self.joy1_old = 0
-        self.joy2_old = 0
+        # Left drive system Controllers [0 - 2]
+        self.joyL = 0
+        self.joyL_old = 0
+        self.joyL_change = 0
+        # Right drive system Controllers [3 - 5]
+        self.joyR = 0
+        self.joyR_old = 0
+        self.joyR_change = 0
+        # Shoulder YAW  Controller 6
+        self.PLaR = 0
+        # Shoulder PITCH Controller 7
+        self.L1 = 0 
+        self.L2 = 0 
+        #  Elbow PITCH Controller 8
+        self.R1 = 0
+        self.R2 = 0
+        # Wrist PITCH Servo
+        self.PUaD = 0
+        # Wrist ROLL (Drill) Controller 9
+        self.SQ = 0
+        self.CI = 0
+        # Gripper ROLL (Finger) Controller 10
+        self.TR = 0
+        self.CR = 0
+
         ###### main loop  ######
         while not rospy.is_shutdown():
             self.synch()
@@ -61,61 +76,113 @@ class RoverComms():
     def synch(self):
     #############################################################
         """
-        Byte array with device and isntruction Ids
-        [0x00,0x00,0x00,0x19] is the isntruction for obtaining the GPS lat/long
-        [0x98,0x76,0x54,0x32] is just an example 
+        Escribir algo useful
+
         """
-        if self.but2 == 1:
+        ##################### Drive System Controllers #####################
+        """ Detect change of joysticks """
+        if self.joyL_old != self.joyL:
+            self.joyL_change = 1
+            self.joyL_old = self.joyL
+
+        if self.joyR_old != self.joyR:
+            self.joyR_change = 1
+            self.joyR_old = self.joyR
+
+        """ Send current speed """
+        if self.joyL_change == 1 or self.joyR_change == 1:
+            left_speed = 0
+            right_speed = 0
+            rospy.loginfo("INFOR: Drive system = Left: %s Right: %s", self.joyL, self.joyR)
+            data = bytearray([0x00, 0x00,0x00,0x00])
+            """ Set left side speed """
+            if self.joyL > 0:
+                left_speed = self.joyL
+            else:
+                left_speed = -self.joyL
+                left_speed = left_speed | (1 << 7)
+            """ Set right side speed """
+            if self.joyR > 0:
+                right_speed = self.joyR
+            else:
+                right_speed = -self.joyR
+                right_speed = right_speed | (1 << 7)
+
+            data = bytearray([0x00, left_speed, right_speed, 0x00])
+
+            self.socket.sendto(data, self.address) #send command to arduino
+
+            self.joyL_change = 0
+            self.joyR_change = 0
+
+        ##################### ARM Controllers #####################
+        """ Shoulder YAW """
+        if self.PLaR == 1:
             data = bytearray([0x00,0x00,0x00,0x07])
             self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("self.but2")
+            rospy.loginfo("INFO: Shoulder moving: LEFT")
 
-        if self.but4 ==1:
+        if self.PLaR == -1:
             data = bytearray([0x00,0x00,0x01,0x07])
             self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("self.but4")
+            rospy.loginfo("INFO: Shoulder moving: RIGHT")
 
-        if self.but3 == 1:
+        """ Shoulder PITCH """
+        if self.L1 == 1:
             data = bytearray([0x00,0x00,0x00,0x08])
             self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("self.but3")
+            rospy.loginfo("INFO: Shoulder moving: UP")
 
-        if self.but5 ==1:
+        if self.L2 == 1:
             data = bytearray([0x00,0x00,0x01,0x08])
             self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("self.but5")
-
-        if self.joy1_old != self.joy1:
-            self.joy1_change = 1
-            self.joy1_old = self.joy1
-
-        if self.joy2_old != self.joy2:
-            self.joy2_change = 1
-            self.joy2_old = self.joy2
+            rospy.loginfo("INFO: Shoulder moving: DOWN")
         
-        if self.joy1_change == 1 or self.joy2_change == 1:
-            leftSide = 0
-            rightSide = 0
-            rospy.loginfo("Drive system = Left: %s Right: %s", self.joy1, self.joy2)
-            data = bytearray([0x00, 0x00,0x00,0x00])
-            if self.joy1 > 0:
-                leftSide = self.joy1
-            else:
-                leftSide = - self.joy1
-                leftSide = leftSide | (1 << 7)
-            
-            if self.joy2 > 0:
-                rightSide = self.joy2
-            else:
-                rightSide = - self.joy2
-                rightSide = rightSide | (1 << 7)
-
-            data = bytearray([0x00, leftSide, rightSide, 0x00])
-
+        """ Elbow PITCH """
+        if self.R1 == 1:
+            data = bytearray([0x00,0x00,0x00,0x09])
             self.socket.sendto(data, self.address) #send command to arduino
+            rospy.loginfo("INFO: Elbow moving: UP")
 
-            self.joy1_change = 0
-            self.joy2_change = 0
+        if self.R2 == 1:
+            data = bytearray([0x00,0x00,0x01,0x09])
+            self.socket.sendto(data, self.address) #send command to arduino
+            rospy.loginfo("INFO: Elbow moving: DOWN")
+
+        ##################### Gripper Controllers #####################
+        """ Wrist PITCH """
+        if self.PUaD == 1:
+            data = bytearray([0x00,0x00,0x00,0x0A])
+            self.socket.sendto(data, self.address) #send command to arduino
+            rospy.loginfo("INFO: Wrist moving: UP")
+
+        if self.PUaD == -1:
+            data = bytearray([0x00,0x00,0x01,0x0A])
+            self.socket.sendto(data, self.address) #send command to arduino
+            rospy.loginfo("INFO: Wrist moving: DOWN")
+
+        """ Wrist ROLL (Drill) """
+        if self.SQ == 1:
+            data = bytearray([0x00,0x00,0x00,0x0B])
+            self.socket.sendto(data, self.address) #send command to arduino
+            rospy.loginfo("INFO: Wrist moving: ROLL LEFT")
+
+        if self.CI == 1:
+            data = bytearray([0x00,0x00,0x01,0x0B])
+            self.socket.sendto(data, self.address) #send command to arduino
+            rospy.loginfo("INFO: Wrist moving: ROLL RIGHT")
+
+        """ Gripper ROLL """
+        if self.TR == 1:
+            data = bytearray([0x00,0x00,0x00,0x0B])
+            self.socket.sendto(data, self.address) #send command to arduino
+            rospy.loginfo("INFO: Gripper moving: OPENING")
+
+        if self.CR == 1:
+            data = bytearray([0x00,0x00,0x01,0x0B])
+            self.socket.sendto(data, self.address) #send command to arduino
+            rospy.loginfo("INFO: Gripper moving: CLOSING")
+
 
         """
         #print type(data)
@@ -163,13 +230,27 @@ class RoverComms():
     #############################################################
     def joyCallBack(self, data):
     #############################################################
-        # rospy.loginfo("-D- twistCallback: %s" % str(msg))
-        self.but2 = data.buttons[1]
-        self.but3 = data.buttons[2]
-        self.but4 = data.buttons[3]
-        self.but5 = data.buttons[4]
-        self.joy1 = int(round(data.axes[2] * 100))
-        self.joy2 = int(round(data.axes[4] * 100))
+        
+        # Left drive system Controllers [0 - 2]
+        self.joyL = int(round(data.axes[1] * 100))
+        # Right drive system Controllers [3 - 5]
+        self.joyR = int(round(data.axes[4] * 100))
+        # Shoulder YAW  Controller 6
+        self.PLaR = data.axes[6]
+        # Shoulder PITCH Controller 7
+        self.L1 = data.buttons[4] 
+        self.L2 = data.buttons[6]
+        #  Elbow PITCH Controller 8
+        self.R1 = data.buttons[5]
+        self.R2 = data.buttons[7]
+        # Wrist PITCH Servo
+        self.PUaD = data.axes[7]
+        # Wrist ROLL (Drill) Controller 9
+        self.SQ = data.buttons[3]
+        self.CI = data.buttons[1]
+        # Gripper ROLL (Finger) Controller 10
+        self.TR = data.buttons[2]
+        self.CR = data.buttons[0]
 
         
     

@@ -24,6 +24,7 @@ typedef enum{
 	ACT_WRIST_PITCH,		//? Wrist Controllers
 	ACT_WRIST_ROLL,
 	ACT_GRIPPER_ROLL,		//? Gripper Controller
+	ACT_COOLING_SET,
 	LOC_UPDATE,
 	LOC_GET_LAT,
 	LOC_GET_LON,
@@ -73,6 +74,9 @@ void loop() {
 						break;
 					case 0x0C:
 						cState = ACT_GRIPPER_ROLL; 		
+						break;
+					case 0x0D:
+						cState = ACT_COOLING_SET;
 						break;
 					case 0x11:
 						cState = LOC_GET_LAT;
@@ -143,6 +147,13 @@ void loop() {
 		case ACT_GRIPPER_ROLL:
 			Serial.println("Gripper ROLL");
 			actuator.gripperRoll(request);
+			cState = IDLE;
+			break;
+
+		case ACT_COOLING_SET:
+			Serial.println("Cooling SET");
+			Serial.println(request, BIN);
+			actuator.coolingSet(request);
 			cState = IDLE;
 			break;
 

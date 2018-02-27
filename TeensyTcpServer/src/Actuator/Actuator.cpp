@@ -178,3 +178,12 @@ void Actuator::gripperRoll(bool direction){
 	delay(200);
 	driveSetSpeed(0, 10);
 }
+
+/* -------------- Cooling System -------------- */
+
+void Actuator::coolingSet(char config){
+	pinMode(16, OUTPUT);
+	pinMode(17, OUTPUT);
+	digitalWrite(16, config & 0x01);
+	digitalWrite(17, config >> 1);
+}

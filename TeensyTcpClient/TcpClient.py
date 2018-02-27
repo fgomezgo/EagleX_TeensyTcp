@@ -68,8 +68,12 @@ class RoverComms():
         # Gripper ROLL (Finger) Controller 10
         self.TR = 0
         self.CR = 0
-        
-        """ Location variabels """
+        """ Cooling System """
+        self.SH = 0
+        self.OP = 0
+        self.cool_left = 0
+        self.cool_right = 0
+        """ Location variables """
         self.navsat = NavSatFix()
         self.time_sec = 0
         self.loc_flag = 0
@@ -190,6 +194,16 @@ class RoverComms():
             self.socket.sendto(data, self.address) #send command to arduino
             rospy.loginfo("INFO: Gripper moving: CLOSING")
 
+        ##################### Cooling System #####################
+        if self.OP == 1:
+            self.cool_left ^= 1
+            data = bytearray([0x00, 0x00, (self.cool_left << 1) | self.cool_right, 0x0D])
+            self.socket.sendto(data, self.address) #send command to arduino
+        if self.SH == 1:
+            self.cool_right ^=1
+            data = bytearray([0x00, 0x00, (self.cool_left << 1) | self.cool_right, 0x0D])
+            self.socket.sendto(data, self.address) #send command to arduino
+
         ##################### Location #####################
         if (rospy.Time.now().secs - self.time_sec) >= 1:
             rospy.loginfo("INFO: Location: Query")
@@ -261,6 +275,9 @@ class RoverComms():
         # Gripper ROLL (Finger) Controller 10
         self.TR = data.buttons[2]
         self.CR = data.buttons[0]
+        # Cooling System (Relays)
+        self.SH = data.buttons[8]
+        self.OP = data.buttons[9]
 
         
     

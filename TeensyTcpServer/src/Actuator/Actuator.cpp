@@ -124,9 +124,9 @@ void Actuator::driveSetSpeed(int percentage, unsigned char device){
 /* -------------- Arm motor controllers -------------- */
 void Actuator::shoulderYaw(bool direction){
 	if(direction){
-		driveSetSpeed(40, 6);
+		driveSetSpeed(15, 6);
 	}else{
-		driveSetSpeed(-40, 6);
+		driveSetSpeed(-15, 6);
 	}
 	delay(200);
 	driveSetSpeed(0, 6);

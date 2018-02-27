@@ -200,7 +200,7 @@ class RoverComms():
             data = bytearray([0x00, 0x00, (self.cool_left << 1) | self.cool_right, 0x0D])
             self.socket.sendto(data, self.address) #send command to arduino
         if self.SH == 1:
-            self.cool_right ^=1
+            self.cool_right ^= 1
             data = bytearray([0x00, 0x00, (self.cool_left << 1) | self.cool_right, 0x0D])
             self.socket.sendto(data, self.address) #send command to arduino
 

@@ -222,39 +222,9 @@ class RoverComms():
             except:
                 pass
 
+            self.location.publish(self.navsat)
             self.time_sec = rospy.Time.now().secs
         
-        """
-        #print type(data)
-        self.socket.sendto(data, self.address) #send command to arduino
-        try:
-            data, addr = self.socket.recvfrom(15) #Read response from arduino
-            #print type(data)
-            if data == "-1":
-                rospy.loginfo("WARNING: No FIX, Dropping frame")
-            else:
-                self.navsat.latitude = float(data)
-                #print data
-        except:
-            pass
-
-        
-        data = bytearray([0x00,0x00,0x00,0x1A])
-        #print type(data)
-        self.socket.sendto(data, self.address) #send command to arduino
-        try:
-            data, addr = self.socket.recvfrom(15) #Read response from arduino
-            #print type(data)
-            if data == "-1":
-                rospy.loginfo("WARNING: No FIX, Dropping frame")
-            else:
-                self.navsat.longitude = float(data)
-                #print data
-        except:
-            pass
-
-        self.location.publish(self.navsat)
-        """
         """        # dx = (l + r) / 2
         # dr = (r - l) / w
             

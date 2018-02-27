@@ -37,7 +37,7 @@ void setup() {
 	Serial.begin(9600); //Turn on Serial Port
 
 	comms.start();
-	//location.moduleConfigure();
+	location.moduleConfigure();
 	actuator.controllerConfigureReset();
 	//Set next state
 	cState = IDLE;
@@ -152,7 +152,7 @@ void loop() {
 			break;
 
 		case LOC_GET_LAT:   // Gets latitude from GPS module and returns to client
-			Serial.println(location.getFix());
+			//Serial.println(location.getFix());
 			if(location.getFix()){
 				comms.writePrecision(location.getLatitude(),5);
 				cState = IDLE;
@@ -162,7 +162,7 @@ void loop() {
 			break;
 
 		case LOC_GET_LON:   // Gets longitude from GPS module and returns to client
-			Serial.println(location.getFix());
+			//Serial.println(location.getFix());
 			if(location.getFix()){
 				comms.writePrecision(location.getLongitude(),5);
 				cState = IDLE;

@@ -152,6 +152,7 @@ void loop() {
 			break;
 
 		case LOC_GET_LAT:   // Gets latitude from GPS module and returns to client
+			Serial.println(location.getFix());
 			if(location.getFix()){
 				comms.writePrecision(location.getLatitude(),5);
 				cState = IDLE;
@@ -161,6 +162,7 @@ void loop() {
 			break;
 
 		case LOC_GET_LON:   // Gets longitude from GPS module and returns to client
+			Serial.println(location.getFix());
 			if(location.getFix()){
 				comms.writePrecision(location.getLongitude(),5);
 				cState = IDLE;

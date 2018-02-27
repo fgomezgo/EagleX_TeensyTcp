@@ -1,119 +1,174 @@
-// Eagle X project based on teensyTcp:
-// 2011-01-30 <jc@wippler.nl> http://opensource.org/licenses/mit-license.php
- 
-#include <EtherCard.h>
+#include "src/Comms/Comms.h"
+#include "src/Location/Location.h"
+#include "src/Actuator/Actuator.h"
 
-//Libraries for 10-DOF
-#include <Wire.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_LSM303_U.h>
-#include <Adafruit_BMP085_U.h>
-#include <Adafruit_L3GD20_U.h>
-#include <Adafruit_10DOF.h>
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEE}; //Assign a mac address
+IPAddress ip(192, 168, 1, 200); //Assign my IP adress
+unsigned int localPort = 5000; //Assign a Port to talk over
+unsigned int request;
+byte header;
 
-/* Assign a unique ID to the sensors */
-Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(30301);
-Adafruit_LSM303_Mag_Unified   mag   = Adafruit_LSM303_Mag_Unified(30302);
-Adafruit_BMP085_Unified       bmp   = Adafruit_BMP085_Unified(18001);
-Adafruit_L3GD20_Unified       gyro  = Adafruit_L3GD20_Unified(20);
+unsigned int instruction;
+String datReq; //String for our data
+Comms comms(ip, mac, localPort);      //  Ethernet module object
+Location location(1);                 // GPS module object
+Actuator actuator(5,6);                     // configure SMC  reset and  error pins
 
+// States
+typedef enum{
+	IDLE,     // Awaits for communication  and gets the id
+	LOCATION,
+	LOC_GET,
+	LOC_LAT,
+	LOC_LON,
+	LOC_NO_FIX,
+	ACT_DRIVE_ALL_SP,		//? Drive System Controllers
+	ACT_ARM_SH_YAW,			//? ARM Controllers
+	ACT_ARM_SH_PITCH,
+	ACT_ARM_EL_PITCH,
+	ACT_WRIST_PITCH,		//? Wrist Controllers
+	ACT_WRIST_ROLL,
+	ACT_GRIPPER_ROLL,		//? Gripper Controller
+	TEST,
+}ServerStates;
 
+ServerStates cState;    // Current state
 
-#define STATIC 0  // set to 1 to disable DHCP (adjust myip/gwip values below)
+void setup() {
+	Serial.begin(9600); //Turn on Serial Port
 
-#if STATIC
-// ethernet interface ip address
-static byte myip[] = { 192,168,1,200 };
-// gateway ip address
-static byte gwip[] = { 192,168,1,1 };
-#endif
-
-// ethernet mac address - must be unique on your network
-static byte mymac[] = { 0x74,0x69,0x69,0x2D,0x30,0x31 };
-
-byte Ethernet::buffer[500]; // tcp/ip send and receive buffer
-
-//Integer to store the number descriptor coming from the client
-int client_instr;
-//String to store the message response to the client
-char server_response[100];
-
-
-void setup(){
-  Serial.begin(57600);
-  Serial.println("\n[backSoon]");
-  
-  if (ether.begin(sizeof Ethernet::buffer, mymac) == 0) 
-    Serial.println( "Failed to access Ethernet controller");
-#if STATIC
-  ether.staticSetup(myip, gwip);
-#else
-  if (!ether.dhcpSetup())
-    Serial.println("DHCP failed");
-#endif
-
-  ether.printIp("IP:  ", ether.myip);
-  ether.printIp("GW:  ", ether.gwip);  
-  ether.printIp("DNS: ", ether.dnsip);  
-
-  //10-DOF Initializers
-  accel.begin();
-  mag.begin();
-  bmp.begin();
-  gyro.begin();
-
-  
+	comms.start();
+	//location.moduleConfigure();
+	actuator.controllerConfigureReset();
+	//Set next state
+	cState = IDLE;
 }
 
-void loop(){
-  // wait for an incoming TCP packet, but ignore its contents
-   uint16_t payloadPos = ether.packetLoop(ether.packetReceive());
- 
-  if (payloadPos) {
-    //Serial.println(payloadPos);
-    char* incomingData = (char *) Ethernet::buffer + payloadPos;
-    //Serial.println(incomingData);
-    sscanf(incomingData,"%d",&client_instr);
+void loop() {
+	switch(cState){
+		case IDLE:
+			if(comms.available()){   // If data is at socket
+				//? Thought this was easier to understand 
+				//? Reads, parses header and stores request
+				request = comms.read();
+				header = request & 0xFF;
+				request = request >> 8;
+				switch(header){  
+					case 0x00:
+						cState = ACT_DRIVE_ALL_SP;		//? SET left and right speed 
+						break;
+					case 0x07:
+						cState = ACT_ARM_SH_YAW; 		
+						break;
+					case 0x08:
+						cState = ACT_ARM_SH_PITCH; 		
+						break;
+					case 0x09:
+						cState = ACT_ARM_EL_PITCH; 		
+						break;
+					case 0x0A:
+						cState = ACT_WRIST_PITCH; 		
+						break;
+					case 0x0B:
+						cState = ACT_WRIST_ROLL; 		
+						break;
+					case 0x0C:
+						cState = ACT_GRIPPER_ROLL; 		
+						break;
+				}
+			}else{
+				//! cState = LOC_GET;
+			}
+			break;
 
-/*  | Device ID | Device Description | Instruction ID |      Instruction Description      |
-    |:---------:|:------------------:|:--------------:|:---------------------------------:|
-    | 10        | 10-DOF             | 10             | Gyroscope Information (x,y,z)     |
-    |           |                    | 11             | Accelerometer Information (x,y,z) |
-    |           |                    | 12             | Magnetometer Information (x,y,z)  |
-    |           |                    | 13             | Pressure and Temperature          |*/
+		case ACT_DRIVE_ALL_SP:
+			int leftSide,rightSide;
+			
+			rightSide =  request & 0xFF;
+			leftSide = request >> 8;
+			if (rightSide >> 7){
+				rightSide = rightSide & 0x7F;
+				rightSide = -rightSide;
+			}
+			if (leftSide >> 7){
+				leftSide = leftSide & 0x7F;
+				leftSide = -leftSide;
+			}
+			Serial.print("left: ");
+			Serial.print(leftSide);
+			Serial.print(" ");
+			Serial.print("right: ");
+			Serial.print(rightSide);
+			Serial.println();
 
-    memset(server_response,0,sizeof server_response);
-    switch(client_instr/100){
-          case 10: //10-DOF
-          
-              sensors_event_t event;
-              
-             switch(client_instr%100){
-                  case 10:
-                        gyro.getEvent(&event);
-                        sprintf(server_response,"%.6f %.6f %.6f",event.gyro.x,event.gyro.y,event.gyro.z);
-                  break;
-                  case 11:
-                       accel.getEvent(&event);
-                       sprintf(server_response,"%.6f %.6f %.6f",event.acceleration.x,event.acceleration.y,event.acceleration.z); 
-                  break;
-                  case 12:
-                       mag.getEvent(&event);
-                       sprintf(server_response,"%.6f %.6f %.6f",event.magnetic.x,event.magnetic.y,event.magnetic.z);
-                  break;
-                  case 13:
-                       bmp.getEvent(&event);
-                       float temperature;
-                       bmp.getTemperature(&temperature);
-                       sprintf(server_response,"%.6f %.6f",event.pressure,temperature);
-                  break;
-              } 
-              memcpy_P(ether.tcpOffset(), server_response, sizeof server_response);
-              ether.httpServerReply(sizeof server_response - 1);
-                       
-          break;
-      
-      }
+			actuator.driveSetAllSpeed(leftSide, rightSide);
+			cState = IDLE;
+			break;
+		
+		case ACT_ARM_SH_YAW:
+			actuator.shoulderYaw(request);
+			cState = IDLE;
+			break;
+		
+		case ACT_ARM_SH_PITCH:
+			actuator.shoulderPitch(request);
+			cState = IDLE;
+			break;
 
-  }
+		case ACT_ARM_EL_PITCH:
+			actuator.elbowPitch(request);
+			cState = IDLE;
+			break;
+
+		case ACT_WRIST_PITCH:
+			actuator.wristPitch(request);
+			cState = IDLE;
+			break;
+
+		case ACT_WRIST_ROLL:
+			actuator.wristRoll(request);
+			cState = IDLE;
+			break;
+
+		case ACT_GRIPPER_ROLL:
+			actuator.gripperRoll(request);
+			cState = IDLE;
+			break;
+
+		case LOC_GET:   // Gets updated data from GPS when no requests  are present
+			location.updateData();
+			cState = IDLE;
+			break;
+
+		case LOC_LAT:   // Gets latitude from GPS module and returns to client
+			if(location.getFix()){
+				comms.writePrecision(location.getLatitude(),5);
+				cState = IDLE;
+			}else{
+				cState = LOC_NO_FIX;
+			}
+			break;
+
+		case LOC_LON:   // Gets longitude from GPS module and returns to client
+			if(location.getFix()){
+				comms.writePrecision(location.getLongitude(),5);
+				cState = IDLE;
+			}else{
+				cState = LOC_NO_FIX;
+			}
+			break;
+
+		case LOC_NO_FIX:  // If there is no FIX send error to host
+			// Send no fix error back
+			comms.write("-1");
+			// Back to idle
+			cState = IDLE;
+			break;
+		case TEST:
+			Serial.println(actuator.driveGetVoltage(3));
+			break;
+
+		default:
+			break;
+	}
 }

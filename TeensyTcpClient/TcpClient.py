@@ -9,6 +9,8 @@ from std_msgs.msg import Float64
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Joy
 from sensor_msgs.msg import NavSatFix
+from sensor_msgs.msg import JointState
+from std_msgs.msg import Header
 
 import time 
 
@@ -30,10 +32,16 @@ class RoverComms():
         self.socket = socket(AF_INET, SOCK_DGRAM)
         self.socket.settimeout(1)
         self.rate = rospy.get_param("~rate", 5)
-        
+        """ Motor Controllers"""
+        rospy.Subscriber('joy', Joy, self.joyCallBack)
+        """ IMU """
+        self.imu = rospy.Publisher('joint_states', JointState, queue_size=10)
+        self.joints = JointState()
+        self.joints.name = ['base_link_to_base_pitch', 'base_pitch_to_base_roll', 'base_roll_to_chasis', 'chasis_to_right', 'chasis_to_left', 'chasis_to_right2', 'chasis_to_left2']
+        """ Location """
         self.location = rospy.Publisher('rover/coordinates', NavSatFix, queue_size=10)
         #self.pub_rmotor = rospy.Publisher('right_motor/setpoint', Float64, queue_size=10)
-        rospy.Subscriber('joy', Joy, self.joyCallBack)
+        
         
         
     #############################################################
@@ -73,6 +81,11 @@ class RoverComms():
         self.OP = 0
         self.cool_left = 0
         self.cool_right = 0
+        """ IMU """
+        self.jointRB = 0
+        self.jointRF = 0
+        self.jointLF = 0
+        self.jointLB = 0
         """ Location variables """
         self.navsat = NavSatFix()
         self.time_sec = 0
@@ -203,6 +216,9 @@ class RoverComms():
             self.cool_right ^= 1
             data = bytearray([0x00, 0x00, (self.cool_left << 1) | self.cool_right, 0x0D])
             self.socket.sendto(data, self.address) #send command to arduino
+
+        ##################### IMU #####################
+
 
         ##################### Location #####################
         if (rospy.Time.now().secs - self.time_sec) >= 1:

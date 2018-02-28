@@ -5,6 +5,7 @@
 #define Actuator_h
 
 #include "Arduino.h"
+#include <Servo.h>
 
 class Actuator{
   public:
@@ -60,6 +61,7 @@ class Actuator{
     //TODO: Method for setting controller power [%]
     char _resetPin;
     char _errPin;
+    Servo _wristPitch;
 
 };
 

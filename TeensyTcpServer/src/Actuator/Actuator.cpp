@@ -34,6 +34,7 @@ void Actuator::controllerConfigureReset(){
 	Serial3.write(0xAA); // send baud-indicator byte
 	// clear the safe-start violation and let the motor run
 	controllerExitSafeStart();
+	_wristPitch.attach(14);
 }
 // Used to read incoming information from the SMC
 int Actuator::controllerReadByte(){
@@ -155,6 +156,13 @@ void Actuator::elbowPitch(bool direction){
 /* -------------- Wrist Controller -------------- */
 void Actuator::wristPitch(bool direction){
 	//TODO implement servo logic
+	if(direction){
+		_wristPitch.write(0);
+	}else{
+		_wristPitch.write(180);
+	}
+	delay(200);
+	_wristPitch.write(90);
 }
 
 void Actuator::wristRoll(bool direction){

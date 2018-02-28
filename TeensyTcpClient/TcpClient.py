@@ -87,6 +87,9 @@ class RoverComms():
         self.jointRF = 0
         self.jointLF = 0
         self.jointLB = 0
+        self.chassisR = 0
+        self.chassisP = 0
+        self.chassisY = 0
         """ Location variables """
         self.navsat = NavSatFix()
         self.time_sec = 0
@@ -220,8 +223,6 @@ class RoverComms():
 
         ##################### IMU #####################
         
-        
-        
         #if (rospy.Time.now().secs - self.time_nsec) >= 1:
             
         data = bytearray([0x00, 0x00, 0x00, 0x0E])  # Suspension Right Back
@@ -255,11 +256,37 @@ class RoverComms():
             self.jointLB = data
         except:
             pass
-        print "Acel: " + self.jointRB + " " + self.jointRF +" "+ self.jointLF + " " + self.jointLB 
+
+        data = bytearray([0x00, 0x00, 0x00, 0x0F])  # Suspension Left Back
+        self.socket.sendto(data, self.address) #send command to arduino
+        try:
+            data, addr = self.socket.recvfrom(15) #Read response from arduino
+            self.chassisR = data
+        except:
+            pass
+
+        data = bytearray([0x00, 0x00, 0x00, 0x4F])  # Suspension Left Back
+        self.socket.sendto(data, self.address) #send command to arduino
+        try:
+            data, addr = self.socket.recvfrom(15) #Read response from arduino
+            self.chassisP = data
+        except:
+            pass
+
+        data = bytearray([0x00, 0x00, 0x00, 0x8F])  # Suspension Left Back
+        self.socket.sendto(data, self.address) #send command to arduino
+        try:
+            data, addr = self.socket.recvfrom(15) #Read response from arduino
+            self.chassisY = data
+        except:
+            pass
+
+        print "Acel: " + self.jointRB + " " + self.jointRF +" "+ self.jointLF + " " + self.jointLB +" "+ self.chassisP + " " + self.chassisR + " " + self.chassisY 
 
         self.joints.header = Header()
         self.joints.header.stamp = rospy.Time.now()
 
+        #self.joints.position = [float(self.chassisP), float(self.chassisR), float(self.chassisY), float(self.jointRB), float(self.jointLB), float(self.jointRF), float(self.jointLF)]
         self.joints.position = [0, 0, 0, float(self.jointRB), float(self.jointLB), float(self.jointRF), float(self.jointLF)]
         self.joints.velocity = []
         self.joints.effort = []

@@ -54,3 +54,58 @@ float Feedback::getSuspensionLB(){
     suspensionImuUpdate();
     return _suspensionsAngle[3];
 }
+
+bool Feedback::chassisImuConf(){
+    bool flag = false;
+    if(!_accel.begin())
+    {
+        /* There was a problem detecting the LSM303 ... check your connections */
+        flag = true;
+    }
+    if(!_mag.begin())
+    {
+        /* There was a problem detecting the LSM303 ... check your connections */
+        flag = true;
+    }
+    if(!_bmp.begin())
+    {
+        /* There was a problem detecting the BMP180 ... check your connections */
+        flag = true;
+    }
+    return flag;
+}
+
+void Feedback::chassisImuUpdate(){
+    _accel.getEvent(&_accel_event);
+    if (_dof.accelGetOrientation(&_accel_event, &_orientation)){
+        if ( abs(((-_orientation.roll) / 50) -_suspensionsAngle[4]) > _radsPerChange * 2) { //and abs( ((-orientation.roll)/50)-positions[2])<radsPerChange*4) {
+            _suspensionsAngle[4]=(-_orientation.roll) / 50;
+        }
+        if ( abs( ((-_orientation.pitch)/50) -_suspensionsAngle[5]) > _radsPerChange * 2) { //and abs( ((-orientation.pitch)/50)-positions[1])<radsPerChange*4) {
+            _suspensionsAngle[5] = _orientation.pitch / 50;  
+        }
+    }
+
+    _mag.getEvent(&_mag_event);
+    if (_dof.magGetOrientation(SENSOR_AXIS_Z, &_mag_event, &_orientation))
+    {    
+        if ( abs( ((-_orientation.heading)/50) -_suspensionsAngle[6]) > _radsPerChange * 2){ //and abs( ((-orientation.heading)/50)-positions[0])<radsPerChange*4)
+            _suspensionsAngle[6] = -_orientation.heading / 50;  
+        }
+    }
+}
+
+float Feedback::getChassisRoll(){
+    chassisImuUpdate();
+    return _suspensionsAngle[4];
+}
+
+float Feedback::getChassisPitch(){
+    chassisImuUpdate();
+    return _suspensionsAngle[5];
+}
+
+float Feedback::getChassisYaw(){
+    chassisImuUpdate();
+    return _suspensionsAngle[6];
+}

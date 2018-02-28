@@ -34,6 +34,9 @@ typedef enum{
 	FEE_GET_SUSP2,
 	FEE_GET_SUSP3,
 	FEE_GET_SUSP4,
+	FEE_GET_CHASS_ROLL,
+	FEE_GET_CHASS_PITCH,
+	FEE_GET_CHASS_YAW,
 	LOC_UPDATE,				//? Location
 	LOC_GET_LAT,
 	LOC_GET_LON,
@@ -55,6 +58,11 @@ void setup() {
 		Serial.println("ERROR: Accelerometer intitialization");
 	}else{
 		Serial.println("MSG: Accelerometers detected");
+	}
+	if(feedback.chassisImuConf()){
+		Serial.println("ERROR: 10-DOF intitialization");
+	}else{
+		Serial.println("MSG: 10-DOF detected");
 	}
 
 	//Set next state
@@ -106,6 +114,15 @@ void loop() {
 						break;
 					case 0xCE:
 						cState = FEE_GET_SUSP4;
+						break;
+					case 0x0F:
+						cState = FEE_GET_CHASS_ROLL;
+						break;
+					case 0x4F:
+						cState = FEE_GET_CHASS_PITCH;
+						break;
+					case 0x8F:
+						cState = FEE_GET_CHASS_YAW;
 						break;
 					case 0x11:
 						cState = LOC_GET_LAT;		//? Location
@@ -208,6 +225,21 @@ void loop() {
 
 		case FEE_GET_SUSP4:
 			comms.writePrecision(feedback.getSuspensionLB(),5);
+			cState = IDLE;
+			break;
+
+		case FEE_GET_CHASS_ROLL:
+			comms.writePrecision(feedback.getChassisRoll(),5);
+			cState = IDLE;
+			break;
+
+		case FEE_GET_CHASS_PITCH:
+			comms.writePrecision(feedback.getChassisPitch(),5);
+			cState = IDLE;
+			break;
+
+		case FEE_GET_CHASS_YAW:
+			comms.writePrecision(feedback.getChassisYaw(),5);
 			cState = IDLE;
 			break;
 

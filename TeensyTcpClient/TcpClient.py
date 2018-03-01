@@ -281,7 +281,7 @@ class RoverComms():
         except:
             pass
 
-        print "Acel: " + self.jointRB + " " + self.jointRF +" "+ self.jointLF + " " + self.jointLB +" "+ self.chassisP + " " + self.chassisR + " " + self.chassisY 
+        #print "Acel: " + self.jointRB + " " + self.jointRF +" "+ self.jointLF + " " + self.jointLB +" "+ self.chassisP + " " + self.chassisR + " " + self.chassisY 
 
         self.joints.header = Header()
         self.joints.header.stamp = rospy.Time.now()

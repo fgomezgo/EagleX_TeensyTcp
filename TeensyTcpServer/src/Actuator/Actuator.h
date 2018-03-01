@@ -62,6 +62,7 @@ class Actuator{
     char _resetPin;
     char _errPin;
     Servo _wristPitch;
+    int _servoState = 60;
 
 };
 

@@ -35,6 +35,7 @@ void Actuator::controllerConfigureReset(){
 	// clear the safe-start violation and let the motor run
 	controllerExitSafeStart();
 	_wristPitch.attach(14);
+	_wristPitch.write(_servoState);
 }
 // Used to read incoming information from the SMC
 int Actuator::controllerReadByte(){
@@ -125,19 +126,19 @@ void Actuator::driveSetSpeed(int percentage, unsigned char device){
 /* -------------- Arm motor controllers -------------- */
 void Actuator::shoulderYaw(bool direction){
 	if(direction){
-		driveSetSpeed(15, 6);
+		driveSetSpeed(30, 6);
 	}else{
-		driveSetSpeed(-15, 6);
+		driveSetSpeed(-30, 6);
 	}
-	delay(200);
+	delay(100);
 	driveSetSpeed(0, 6);
 }
 
 void Actuator::shoulderPitch(bool direction){
 	if(direction){
-		driveSetSpeed(40, 7);
+		driveSetSpeed(80, 7);
 	}else{
-		driveSetSpeed(-40, 7);
+		driveSetSpeed(-80, 7);
 	}
 	delay(200);
 	driveSetSpeed(0, 7);
@@ -145,9 +146,9 @@ void Actuator::shoulderPitch(bool direction){
 
 void Actuator::elbowPitch(bool direction){
 	if(direction){
-		driveSetSpeed(40, 8);
+		driveSetSpeed(80, 8);
 	}else{
-		driveSetSpeed(-40, 8);
+		driveSetSpeed(-80, 8);
 	}
 	delay(200);
 	driveSetSpeed(0, 8);
@@ -156,13 +157,13 @@ void Actuator::elbowPitch(bool direction){
 /* -------------- Wrist Controller -------------- */
 void Actuator::wristPitch(bool direction){
 	//TODO implement servo logic
+	
 	if(direction){
-		_wristPitch.write(0);
+		_servoState--;
 	}else{
-		_wristPitch.write(180);
+		_servoState++;
 	}
-	delay(200);
-	_wristPitch.write(90);
+	_wristPitch.write(_servoState);
 }
 
 void Actuator::wristRoll(bool direction){
@@ -178,6 +179,7 @@ void Actuator::wristRoll(bool direction){
 
 /* -------------- Gripper Controller -------------- */
 void Actuator::gripperRoll(bool direction){
+	delay(100);
 	if(direction){
 		driveSetSpeed(40, 10);
 	}else{

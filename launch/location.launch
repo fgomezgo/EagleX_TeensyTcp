@@ -26,4 +26,8 @@
   <!-- Needed only for searching for services -->
   <node pkg="rosapi" type="rosapi_node" name="rosapi"/>
 
+  <node pkg = "joy" type = "joy_node" name = "joy">
+    <param name="dev" type="string" value="/dev/input/js1" />
+  </node>
+
 </launch>

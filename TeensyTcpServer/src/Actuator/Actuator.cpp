@@ -56,14 +56,20 @@ unsigned int Actuator::controllerGetVariable(unsigned char variableID, unsigned 
 
 // Sets all motors at one side to said speed
 void Actuator::driveSetAllSpeed(int speedLeft, int speedRight){
-	for(int i = 0; i < 3; i++){
+	for(int i = 1; i < 4; i++){		// Drivers 1-3
 		driveSetSpeed(speedLeft, i);
 		delay(5); // Is it needed?
 	}
-	for(int i = 3; i < 6; i++){
-		driveSetSpeed(-speedRight, i);
-		delay(5); // Is it needed?
-	}
+	//Drivers 8, 10, 11
+	driveSetSpeed(-speedRight, 8);
+	delay(5); // Is it needed?
+	//Drivers 8, 10, 11
+	driveSetSpeed(-speedRight, 10);
+	delay(5); // Is it needed?
+	//Drivers 8, 10, 11
+	driveSetSpeed(-speedRight, 11);
+	delay(5); // Is it needed?
+	
 }
 
 // Returns avg voltage of all SMC at the rover
@@ -126,32 +132,32 @@ void Actuator::driveSetSpeed(int percentage, unsigned char device){
 /* -------------- Arm motor controllers -------------- */
 void Actuator::shoulderYaw(bool direction){
 	if(direction){
-		driveSetSpeed(30, 6);
+		driveSetSpeed(100, 4);
 	}else{
-		driveSetSpeed(-30, 6);
+		driveSetSpeed(-100, 4);
 	}
-	delay(100);
-	driveSetSpeed(0, 6);
+	delay(200);
+	driveSetSpeed(0, 4);
 }
 
 void Actuator::shoulderPitch(bool direction){
 	if(direction){
-		driveSetSpeed(80, 7);
+		driveSetSpeed(80, 6);
 	}else{
-		driveSetSpeed(-80, 7);
+		driveSetSpeed(-80, 6);
 	}
 	delay(200);
-	driveSetSpeed(0, 7);
+	driveSetSpeed(0, 6);
 }
 
 void Actuator::elbowPitch(bool direction){
 	if(direction){
-		driveSetSpeed(80, 8);
+		driveSetSpeed(-80, 5);
 	}else{
-		driveSetSpeed(-80, 8);
+		driveSetSpeed(80, 5);
 	}
 	delay(200);
-	driveSetSpeed(0, 8);
+	driveSetSpeed(0, 5);
 }
 
 /* -------------- Wrist Controller -------------- */
@@ -159,9 +165,9 @@ void Actuator::wristPitch(bool direction){
 	//TODO implement servo logic
 	
 	if(direction){
-		_servoState--;
+		_servoState = _servoState - 4;
 	}else{
-		_servoState++;
+		_servoState = _servoState + 4;
 	}
 	_wristPitch.write(_servoState);
 }
@@ -181,12 +187,12 @@ void Actuator::wristRoll(bool direction){
 void Actuator::gripperRoll(bool direction){
 	delay(100);
 	if(direction){
-		driveSetSpeed(40, 10);
+		driveSetSpeed(100, 7);
 	}else{
-		driveSetSpeed(-40, 10);
+		driveSetSpeed(-100, 7);
 	}
-	delay(200);
-	driveSetSpeed(0, 10);
+	delay(100);
+	driveSetSpeed(0, 7);
 }
 
 /* -------------- Cooling System -------------- */

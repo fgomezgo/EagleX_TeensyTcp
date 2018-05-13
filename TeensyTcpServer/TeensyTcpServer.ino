@@ -132,7 +132,7 @@ void loop() {
 						break;
 				}
 			}else{
-				cState = LOC_UPDATE;
+				//cState = LOC_UPDATE;
 			}
 			break;
 

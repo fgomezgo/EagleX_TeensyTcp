@@ -224,7 +224,7 @@ class RoverComms():
         ##################### IMU #####################
         
         #if (rospy.Time.now().secs - self.time_nsec) >= 1:
-            
+        """
         data = bytearray([0x00, 0x00, 0x00, 0x0E])  # Suspension Right Back
         self.socket.sendto(data, self.address) #send command to arduino
         try:
@@ -294,12 +294,13 @@ class RoverComms():
 
 
         self.time_nsec = rospy.Time.now().secs
-
+        """
         ##################### Location #####################
+        """
         if (rospy.Time.now().secs - self.time_sec) >= 2:
             rospy.loginfo("INFO: Location: Query")
 
-            """ Get Latitude """
+            # Get Latitude 
             data = bytearray([0x00,0x00,0x00,0x11])
             self.socket.sendto(data, self.address) #send command to arduino
             try:
@@ -312,7 +313,7 @@ class RoverComms():
             except:
                 pass
 
-            """ Get Longitude """
+            # Get Longitude 
             data = bytearray([0x00,0x00,0x00,0x51])
             self.socket.sendto(data, self.address) #send command to arduino
             try:
@@ -329,6 +330,7 @@ class RoverComms():
 
             self.location.publish(self.navsat)
             self.time_sec = rospy.Time.now().secs
+        """
         
         """        # dx = (l + r) / 2
         # dr = (r - l) / w

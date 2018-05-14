@@ -22,7 +22,7 @@ Feedback feedback(LIS3DH_CS, 0, 1, 32);
 typedef enum{
 	IDLE,     // Awaits for communication  and gets the id
 	ACT_DRIVE_ALL_SP,		//? Drive System Controllers
-	ACT_ARM_SH_YAW,			//? ARM Controllers
+	ACT_ARM,			//? ARM Controllers
 	ACT_ARM_SH_PITCH,
 	ACT_ARM_EL_PITCH,
 	ACT_WRIST_PITCH,		//? Wrist Controllers
@@ -83,8 +83,9 @@ void loop() {
 						cState = ACT_DRIVE_ALL_SP;		//? SET left and right speed 
 						break;
 					case 0x07:
-						cState = ACT_ARM_SH_YAW; 		//? Arm controllers
+						cState = ACT_ARM; 		//? Arm controllers
 						break;
+					/*
 					case 0x08:
 						cState = ACT_ARM_SH_PITCH; 		
 						break;
@@ -101,6 +102,7 @@ void loop() {
 						cState = ACT_GRIPPER_ROLL; 		
 						break;
 					case 0x0D:
+					*/
 						cState = ACT_COOLING_SET;	//? Cooling System
 						break;
 					case 0x0E:
@@ -160,12 +162,52 @@ void loop() {
 			cState = IDLE;
 			break;
 		
-		case ACT_ARM_SH_YAW:
-			Serial.println("Shoulder YAW");
+		case ACT_ARM:
+			shoulder_yaw = request;
+			shoulder_yaw = shoulder_yaw & 0x01;
+
+			shoulder_pitch = request<<2;
+			shoulder_pitch = shoulder_pitch & 0x01;
+
+			elbow_pitch = request<<4;
+			elbow_pitch = elbow_pitch & 0x01;
+
+			wrist_pitch = request<<6;
+			wrist_pitch = wrist_pitch & 0x01;
+
+			wrist_roll = request<<8;
+			wrist_roll = wrist_roll & 0x01;
+
+			gripper_roll = request<<10;
+			gripper_roll gripper_roll & 0x01;
+
+			if(shoulder_yaw){
+				Serial.println("Shoulder YAW");
+			}
+
+			if(shoulder_pitch){
+				Serial.println("Shoulder PITCH");
+			}
+
+			if(elbow_pitch){
+				Serial.println("Elbow PITCH");
+			}
+
+			if(wrist_pitch){
+				Serial.println("Wrist PITCH");
+			}
+
+			if(wrist_roll){
+				Serial.println("Wrist ROLL");
+			}
+
+			if(gripper_roll){
+				Serial.println("Gripper ROLL");
+			}
 			actuator.shoulderYaw(request);
 			cState = IDLE;
 			break;
-		
+		/*
 		case ACT_ARM_SH_PITCH:
 			Serial.println("Shoulder PITCH");
 			actuator.shoulderPitch(request);
@@ -195,7 +237,7 @@ void loop() {
 			actuator.gripperRoll(request);
 			cState = IDLE;
 			break;
-
+		*/
 		case ACT_COOLING_SET:
 			Serial.println("Cooling SET");
 			Serial.println(request, BIN);

@@ -16,7 +16,6 @@ Actuator::Actuator(char reset, char error){
 	_errPin = error;
 }
 
-
 //* Utility methods/Functions -----------------
 
 void Actuator::controllerConfigureReset(){

@@ -144,72 +144,101 @@ class RoverComms():
             self.joyR_change = 0
 
         ##################### ARM Controllers #####################
+        first_byte = 0x07
+        second_byte = 0X00
+        third_byte = 0x00
         """ Shoulder YAW """
         if self.PLaR == 1:
-            data = bytearray([0x00,0x00,0x00,0x07])
-            self.socket.sendto(data, self.address) #send command to arduino
+            #EN
+            second_byte = 0x01
+            #DIR
+            second_byte = second_byte | (0<<1)
             rospy.loginfo("INFO: Shoulder moving: LEFT")
 
         if self.PLaR == -1:
-            data = bytearray([0x00,0x00,0x01,0x07])
-            self.socket.sendto(data, self.address) #send command to arduino
+            #EN
+            second_byte = 0x01
+            #DIR
+            second_byte = second_byte | (1<<1)
             rospy.loginfo("INFO: Shoulder moving: RIGHT")
 
         """ Shoulder PITCH """
         if self.L1 == 1:
-            data = bytearray([0x00,0x00,0x00,0x08])
-            self.socket.sendto(data, self.address) #send command to arduino
+            #EN
+            second_byte = second_byte | (1<<2)
+            #DIR
+            second_byte = second_byte | (0<<3) 
             rospy.loginfo("INFO: Shoulder moving: UP")
 
         if self.L2 == 1:
-            data = bytearray([0x00,0x00,0x01,0x08])
-            self.socket.sendto(data, self.address) #send command to arduino
+            #EN
+            second_byte = second_byte | (1<<2)
+            #DIR
+            second_byte = second_byte | (1<<3) 
             rospy.loginfo("INFO: Shoulder moving: DOWN")
-        
         """ Elbow PITCH """
         if self.R1 == 1:
-            data = bytearray([0x00,0x00,0x00,0x09])
-            self.socket.sendto(data, self.address) #send command to arduino
+            #EN
+            second_byte = second_byte | (1<<4)
+            #DIR
+            second_byte = second_byte | (0<<5) 
             rospy.loginfo("INFO: Elbow moving: UP")
 
         if self.R2 == 1:
-            data = bytearray([0x00,0x00,0x01,0x09])
-            self.socket.sendto(data, self.address) #send command to arduino
+            #EN
+            second_byte = second_byte | (1<<4)
+            #DIR
+            second_byte = second_byte | (1<<5) 
             rospy.loginfo("INFO: Elbow moving: DOWN")
 
         ##################### Gripper Controllers #####################
         """ Wrist PITCH """
         if self.PUaD == 1:
-            data = bytearray([0x00,0x00,0x00,0x0A])
-            self.socket.sendto(data, self.address) #send command to arduino
+            #EN
+            second_byte = second_byte | (1<<6)
+            #DIR
+            second_byte = second_byte | (0<<7) 
             rospy.loginfo("INFO: Wrist moving: UP")
 
         if self.PUaD == -1:
-            data = bytearray([0x00,0x00,0x01,0x0A])
-            self.socket.sendto(data, self.address) #send command to arduino
+            #EN
+            second_byte = second_byte | (1<<6)
+            #DIR
+            second_byte = second_byte | (1<<7) 
             rospy.loginfo("INFO: Wrist moving: DOWN")
 
         """ Wrist ROLL (Drill) """
         if self.SQ == 1:
-            data = bytearray([0x00,0x00,0x00,0x0B])
-            self.socket.sendto(data, self.address) #send command to arduino
+            #EN
+            third_byte = 0x01
+            #DIR
+            third_byte = third_byte | (0<<1)
             rospy.loginfo("INFO: Wrist moving: ROLL LEFT")
 
         if self.CI == 1:
-            data = bytearray([0x00,0x00,0x01,0x0B])
-            self.socket.sendto(data, self.address) #send command to arduino
+            #EN
+            third_byte = 0x01
+            #DIR
+            third_byte = third_byte | (1<<1)
             rospy.loginfo("INFO: Wrist moving: ROLL RIGHT")
 
         """ Gripper ROLL """
         if self.TR == 1:
-            data = bytearray([0x00,0x00,0x00,0x0C])
-            self.socket.sendto(data, self.address) #send command to arduino
+            #EN
+            third_byte = third_byte | (1<<2)
+            #DIR
+            third_byte = third_byte | (1<<3) 
             rospy.loginfo("INFO: Gripper moving: OPENING")
 
         if self.CR == 1:
-            data = bytearray([0x00,0x00,0x01,0x0C])
-            self.socket.sendto(data, self.address) #send command to arduino
+            #EN
+            third_byte = third_byte | (1<<2)
+            #DIR
+            third_byte = third_byte | (1<<3) 
             rospy.loginfo("INFO: Gripper moving: CLOSING")
+        if(second_byte != 0X00 or third_byte != 0x00):
+             data = bytearray([0x00, third_byte, second_byte, first_byte])
+             self.socket.sendto(data, self.address) #send command to arduino
 
         ##################### Cooling System #####################
         if self.OP == 1:

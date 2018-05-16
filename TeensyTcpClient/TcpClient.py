@@ -234,7 +234,7 @@ class RoverComms():
             #EN
             third_byte = third_byte | (1<<2)
             #DIR
-            third_byte = third_byte | (1<<3) 
+            third_byte = third_byte | (0<<3) 
             rospy.loginfo("INFO: Gripper moving: CLOSING")
         if(second_byte != 0X00 or third_byte != 0x00):
              data = bytearray([0x00, third_byte, second_byte, first_byte])

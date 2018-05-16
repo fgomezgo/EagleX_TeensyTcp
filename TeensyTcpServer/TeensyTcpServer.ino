@@ -102,9 +102,9 @@ void loop() {
 						cState = ACT_gripper_roll_en; 		
 						break;
 					case 0x0D:
-					*/
 						cState = ACT_COOLING_SET;	//? Cooling System
 						break;
+						*/
 					case 0x0E:
 						cState = FEE_GET_SUSP1;		//? IMU
 						break;
@@ -163,73 +163,106 @@ void loop() {
 			break;
 /*////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 		case ACT_ARM:
+			//! ///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+			Serial.println(request,BIN);
+			//! ///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+			unsigned int shoulder_yaw_en;
 			shoulder_yaw_en = request;
 			shoulder_yaw_en = shoulder_yaw_en & 0x01;
 
-			shoulder_yaw_dir = request<<1;
+			unsigned int shoulder_yaw_dir;
+			shoulder_yaw_dir = request>>1;
 			shoulder_yaw_dir = shoulder_yaw_dir & 0x01;
 
-			shoulder_pitch_en = request<<2;
+			unsigned int shoulder_pitch_en;
+			shoulder_pitch_en = request>>2;
 			shoulder_pitch_en = shoulder_pitch_en & 0x01;
 
-			shoulder_pitch_dir = request<<3;
+			unsigned int shoulder_pitch_dir;
+			shoulder_pitch_dir = request>>3;
 			shoulder_pitch_dir = shoulder_pitch_dir & 0x01;
 
-			elbow_pitch_en = request<<4;
+			unsigned int elbow_pitch_en;
+			elbow_pitch_en = request>>4;
 			elbow_pitch_en = elbow_pitch_en & 0x01;
 
-			elbow_pitch_dir = request<<5;
+			unsigned int elbow_pitch_dir;
+			elbow_pitch_dir = request>>5;
 			elbow_pitch_dir = elbow_pitch_dir & 0x01;
 
-			wrist_pitch_en = request<<6;
+			unsigned int wrist_pitch_en;
+			wrist_pitch_en = request>>6;
 			wrist_pitch_en = wrist_pitch_en & 0x01;
 
-			wrist_pitch_dir = request<<7;
+			unsigned int wrist_pitch_dir;
+			wrist_pitch_dir = request>>7;
 			wrist_pitch_dir = wrist_pitch_dir & 0x01;
 
-			wrist_roll_en = request<<8;
+			unsigned int wrist_roll_en;
+			wrist_roll_en = request>>8;
 			wrist_roll_en = wrist_roll_en & 0x01;
 
-			wrist_roll_dir = request<<9;
+			unsigned int wrist_roll_dir;
+			wrist_roll_dir = request>>9;
 			wrist_roll_dir = wrist_roll_dir & 0x01;
 
-			gripper_roll_en = request<<10;
-			gripper_roll_en gripper_roll_en & 0x01;
+			unsigned int gripper_roll_en;
+			gripper_roll_en = request>>10;
+			gripper_roll_en = gripper_roll_en & 0x01;
 
-			gripper_roll_dir = request<<11;
-			gripper_roll_dir gripper_roll_dir & 0x01;
+			unsigned int gripper_roll_dir;
+			gripper_roll_dir = request>>11;
+			gripper_roll_dir = gripper_roll_dir & 0x01;
 
 			if(shoulder_yaw_en){
+				//! ///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+				Serial.println(shoulder_yaw_dir,BIN);
+				//! ////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 				Serial.println("Shoulder YAW");
 				actuator.shoulderYaw(shoulder_yaw_dir);
 				cState = IDLE;
 			}
 
 			if(shoulder_pitch_en){
+				//! ///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+				Serial.println(shoulder_pitch_dir,BIN);
+				//! ////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 				Serial.println("Shoulder PITCH");
 				actuator.shoulderPitch(shoulder_pitch_dir);
 				cState = IDLE;
 			}
 
 			if(elbow_pitch_en){
+				//! ///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+				Serial.println(elbow_pitch_dir,BIN);
+				//! ////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 				Serial.println("Elbow PITCH");
 				actuator.elbowPitch(elbow_pitch_dir);
 				cState = IDLE;
 			}
 
 			if(wrist_pitch_en){
+				//! ///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+				Serial.println(wrist_pitch_dir,BIN);
+				//! ////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 				Serial.println("Wrist PITCH");
 				actuator.wristPitch(wrist_pitch_dir);
 				cState = IDLE;
 			}
 
 			if(wrist_roll_en){
+				//! ///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+				Serial.println(wrist_roll_dir,BIN);
+				//! ////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 				Serial.println("Wrist ROLL");
 				actuator.wristRoll(wrist_roll_dir);
 				cState = IDLE;
 			}
 
 			if(gripper_roll_en){
+				//! ///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+				Serial.println(gripper_roll_dir,BIN);
+				//! ////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 				Serial.println("Gripper ROLL");
 				actuator.gripperRoll(gripper_roll_dir);
 				cState = IDLE;

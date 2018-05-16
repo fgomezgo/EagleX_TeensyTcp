@@ -37,7 +37,8 @@ class Actuator{
     unsigned int driveGetTemp(unsigned char device);
     void driveSetSpeed(int percentage, unsigned char device);
     
-      
+/*////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+
     /* -------------- Arm motor controllers -------------- */
     //?: delay works good enough!
     void shoulderYaw(bool direction);
@@ -52,6 +53,7 @@ class Actuator{
     /* -------------- Gripper Controller -------------- */
     void gripperRoll(bool direction);
 
+/*////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
     /* -------------- Cooling System -------------- */
     //TODO: Plan is to send byte with fans states encoded?

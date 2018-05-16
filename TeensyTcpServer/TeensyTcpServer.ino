@@ -25,9 +25,9 @@ typedef enum{
 	ACT_ARM,			//? ARM Controllers
 	ACT_ARM_SH_PITCH,
 	ACT_ARM_EL_PITCH,
-	ACT_WRIST_PITCH,		//? Wrist Controllers
-	ACT_WRIST_ROLL,
-	ACT_GRIPPER_ROLL,		//? Gripper Controller
+	ACT_wrist_pitch_en,		//? Wrist Controllers
+	ACT_wrist_roll_en,
+	ACT_gripper_roll_en,		//? Gripper Controller
 	ACT_COOLING_SET,		//? Cooling System
 	FEE_UPD_SUSPS,			//? IMU
 	FEE_GET_SUSP1,
@@ -93,13 +93,13 @@ void loop() {
 						cState = ACT_ARM_EL_PITCH; 		
 						break;
 					case 0x0A:
-						cState = ACT_WRIST_PITCH; 		
+						cState = ACT_wrist_pitch_en; 		
 						break;
 					case 0x0B:
-						cState = ACT_WRIST_ROLL; 		
+						cState = ACT_wrist_roll_en; 		
 						break;
 					case 0x0C:
-						cState = ACT_GRIPPER_ROLL; 		
+						cState = ACT_gripper_roll_en; 		
 						break;
 					case 0x0D:
 					*/
@@ -161,51 +161,86 @@ void loop() {
 			actuator.driveSetAllSpeed(leftSide, rightSide);
 			cState = IDLE;
 			break;
-		
+/*////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 		case ACT_ARM:
-			shoulder_yaw = request;
-			shoulder_yaw = shoulder_yaw & 0x01;
+			shoulder_yaw_en = request;
+			shoulder_yaw_en = shoulder_yaw_en & 0x01;
 
-			shoulder_pitch = request<<2;
-			shoulder_pitch = shoulder_pitch & 0x01;
+			shoulder_yaw_dir = request<<1;
+			shoulder_yaw_dir = shoulder_yaw_dir & 0x01;
 
-			elbow_pitch = request<<4;
-			elbow_pitch = elbow_pitch & 0x01;
+			shoulder_pitch_en = request<<2;
+			shoulder_pitch_en = shoulder_pitch_en & 0x01;
 
-			wrist_pitch = request<<6;
-			wrist_pitch = wrist_pitch & 0x01;
+			shoulder_pitch_dir = request<<3;
+			shoulder_pitch_dir = shoulder_pitch_dir & 0x01;
 
-			wrist_roll = request<<8;
-			wrist_roll = wrist_roll & 0x01;
+			elbow_pitch_en = request<<4;
+			elbow_pitch_en = elbow_pitch_en & 0x01;
 
-			gripper_roll = request<<10;
-			gripper_roll gripper_roll & 0x01;
+			elbow_pitch_dir = request<<5;
+			elbow_pitch_dir = elbow_pitch_dir & 0x01;
 
-			if(shoulder_yaw){
+			wrist_pitch_en = request<<6;
+			wrist_pitch_en = wrist_pitch_en & 0x01;
+
+			wrist_pitch_dir = request<<7;
+			wrist_pitch_dir = wrist_pitch_dir & 0x01;
+
+			wrist_roll_en = request<<8;
+			wrist_roll_en = wrist_roll_en & 0x01;
+
+			wrist_roll_dir = request<<9;
+			wrist_roll_dir = wrist_roll_dir & 0x01;
+
+			gripper_roll_en = request<<10;
+			gripper_roll_en gripper_roll_en & 0x01;
+
+			gripper_roll_dir = request<<11;
+			gripper_roll_dir gripper_roll_dir & 0x01;
+
+			if(shoulder_yaw_en){
 				Serial.println("Shoulder YAW");
+				actuator.shoulderYaw(shoulder_yaw_dir);
+				cState = IDLE;
 			}
 
-			if(shoulder_pitch){
+			if(shoulder_pitch_en){
 				Serial.println("Shoulder PITCH");
+				actuator.shoulderPitch(shoulder_pitch_dir);
+				cState = IDLE;
 			}
 
-			if(elbow_pitch){
+			if(elbow_pitch_en){
 				Serial.println("Elbow PITCH");
+				actuator.elbowPitch(elbow_pitch_dir);
+				cState = IDLE;
 			}
 
-			if(wrist_pitch){
+			if(wrist_pitch_en){
 				Serial.println("Wrist PITCH");
+				actuator.wristPitch(wrist_pitch_dir);
+				cState = IDLE;
 			}
 
-			if(wrist_roll){
+			if(wrist_roll_en){
 				Serial.println("Wrist ROLL");
+				actuator.wristRoll(wrist_roll_dir);
+				cState = IDLE;
 			}
 
-			if(gripper_roll){
+			if(gripper_roll_en){
 				Serial.println("Gripper ROLL");
+				actuator.gripperRoll(gripper_roll_dir);
+				cState = IDLE;
 			}
+			if(gripper_roll_en | wrist_roll_en | wrist_pitch_en | elbow_pitch_en | shoulder_pitch_en | shoulder_yaw_en){
+				delay(200);
+			}
+			/*
 			actuator.shoulderYaw(request);
 			cState = IDLE;
+			*/
 			break;
 		/*
 		case ACT_ARM_SH_PITCH:
@@ -220,24 +255,25 @@ void loop() {
 			cState = IDLE;
 			break;
 
-		case ACT_WRIST_PITCH:
+		case ACT_wrist_pitch_en:
 			Serial.println("Wrist PITCH");
 			actuator.wristPitch(request);
 			cState = IDLE;
 			break;
 
-		case ACT_WRIST_ROLL:
+		case ACT_wrist_roll_en:
 			Serial.println("Wrist ROLL");
 			actuator.wristRoll(request);
 			cState = IDLE;
 			break;
 
-		case ACT_GRIPPER_ROLL:
+		case ACT_gripper_roll_en:
 			Serial.println("Gripper ROLL");
 			actuator.gripperRoll(request);
 			cState = IDLE;
 			break;
 		*/
+/*////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 		case ACT_COOLING_SET:
 			Serial.println("Cooling SET");
 			Serial.println(request, BIN);

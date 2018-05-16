@@ -128,6 +128,7 @@ void Actuator::driveSetSpeed(int percentage, unsigned char device){
 	Serial3.write(0x00);
 	Serial3.write(percentage);
 }
+/*////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
 /* -------------- Arm motor controllers -------------- */
 void Actuator::shoulderYaw(bool direction){
@@ -136,7 +137,6 @@ void Actuator::shoulderYaw(bool direction){
 	}else{
 		driveSetSpeed(-100, 4);
 	}
-	delay(200);
 	driveSetSpeed(0, 4);
 }
 
@@ -146,7 +146,6 @@ void Actuator::shoulderPitch(bool direction){
 	}else{
 		driveSetSpeed(-80, 6);
 	}
-	delay(200);
 	driveSetSpeed(0, 6);
 }
 
@@ -156,7 +155,6 @@ void Actuator::elbowPitch(bool direction){
 	}else{
 		driveSetSpeed(80, 5);
 	}
-	delay(200);
 	driveSetSpeed(0, 5);
 }
 
@@ -178,10 +176,8 @@ void Actuator::wristRoll(bool direction){
 	}else{
 		driveSetSpeed(-40, 9);
 	}
-	delay(200);
 	driveSetSpeed(0, 9);
 }
-
 
 /* -------------- Gripper Controller -------------- */
 void Actuator::gripperRoll(bool direction){
@@ -191,9 +187,11 @@ void Actuator::gripperRoll(bool direction){
 	}else{
 		driveSetSpeed(-100, 7);
 	}
-	delay(100);
 	driveSetSpeed(0, 7);
 }
+
+
+/*////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
 /* -------------- Cooling System -------------- */
 

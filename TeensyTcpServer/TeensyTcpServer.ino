@@ -18,6 +18,8 @@ Actuator actuator(5,6);                     // configure SMC  reset and  error p
 char LIS3DH_CS[4] = {20, 21, 22, 23};		//IMU
 Feedback feedback(LIS3DH_CS, 0, 1, 32);
 
+Encoder myEnc(24, 25);
+
 // States
 typedef enum{
 	IDLE,     // Awaits for communication  and gets the id
@@ -36,7 +38,8 @@ typedef enum{
 	FEE_GET_SUSP4,
 	FEE_GET_CHASS_ROLL,
 	FEE_GET_CHASS_PITCH,
-	FEE_GET_CHASS_YAW,
+	FEE_GET_CHASS_YAW,		
+	FEE_GET_AVG_SPEED,			//? Encoders
 	LOC_UPDATE,				//? Location
 	LOC_GET_LAT,
 	LOC_GET_LON,
@@ -47,6 +50,7 @@ typedef enum{
 ServerStates cState;    // Current state
 
 void setup() {
+	//enc_arr[0] = myEnc;
 	Serial.begin(9600); //Turn on Serial Port
 
 	comms.start();
@@ -64,9 +68,9 @@ void setup() {
 	}else{
 		Serial.println("MSG: 10-DOF detected");
 	}
-
+	feedback.encodersInit(&myEnc);
 	//Set next state
-	cState = IDLE;
+	cState = TEST;
 }
 
 void loop() {
@@ -276,10 +280,12 @@ void loop() {
 			cState = IDLE;
 			break;
 		case TEST:
-			Serial.println(actuator.driveGetVoltage(3));
+			Serial.println(feedback.encodersRead(0));
 			break;
 
 		default:
 			break;
 	}
+
+	delay(100);
 }

@@ -13,6 +13,8 @@
 #include <Adafruit_BMP085_U.h>
 #include <Adafruit_L3GD20_U.h>
 #include <Adafruit_10DOF.h>
+#include <Encoder.h>
+
 
 class Feedback{
     public:
@@ -28,6 +30,10 @@ class Feedback{
         float getChassisRoll();
         float getChassisPitch();
         float getChassisYaw();
+        //* Encoders
+        void encodersInit( Encoder *encoder);
+        float encodersRead(char i);
+        void  encodersReadAll();
 
     private:
         Adafruit_LIS3DH _lis[4];
@@ -45,6 +51,16 @@ class Feedback{
         sensors_event_t _mag_event;
         sensors_event_t _bmp_event;
         sensors_vec_t   _orientation;
+
+        // Encoders
+
+        Encoder *_encoder;
+        long oldPosition[6] = {-999, -999, -999, -999, -999, -999};
+        long newPosition[6];
+        float rads[6];
+
+        float pi = 3.14159;
+        float r = 0.075;
 
 };
 

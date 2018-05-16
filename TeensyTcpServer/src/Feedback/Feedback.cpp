@@ -11,6 +11,7 @@ Feedback::Feedback(char LIS3DH_CS[4], char LIS3DH_MOSI, char LIS3DH_MISO, char L
     for(int i = 0; i < 4; i++){
         _lis[i] = Adafruit_LIS3DH(LIS3DH_CS[i], LIS3DH_MOSI, LIS3DH_MISO, LIS3DH_CLK);
     }
+    
 }
 
 bool Feedback::suspensionImuConf(){
@@ -21,6 +22,7 @@ bool Feedback::suspensionImuConf(){
         }
         delay(10);
      }
+     //encoders[1]=Encoder (3, 5); //Right 1
      return flag;
 }
 
@@ -108,4 +110,36 @@ float Feedback::getChassisPitch(){
 float Feedback::getChassisYaw(){
     chassisImuUpdate();
     return _suspensionsAngle[6];
+}
+
+//* Encoders --------------
+
+void Feedback::encodersInit(Encoder *encoder){
+    /* Assign a unique ID to the sensors */
+    _encoder = encoder;
+}
+
+float Feedback::encodersRead(char i){
+    newPosition[i] = _encoder[i].read();
+    if (newPosition[i] != oldPosition[i]) {
+        rads[i] = abs(oldPosition[i]-newPosition[i])*(pi/100.0);
+        rads[i] = rads[i]*r;
+        oldPosition[i] = newPosition[i];
+    }else{
+        rads[i]=0;
+    }
+    return rads[i];
+}
+
+void Feedback::encodersReadAll(){
+    for (int i=0; i<2; i++) {
+        newPosition[i] = _encoder[i].read();
+        if (newPosition[i] != oldPosition[i]) {
+            rads[i] = abs(oldPosition[i]-newPosition[i])*(pi/100.0);
+            rads[i] = rads[i]*r;
+            oldPosition[i] = newPosition[i];
+        }else{
+            rads[i]=0;
+        }
+    }
 }

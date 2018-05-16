@@ -52,6 +52,7 @@ class Actuator{
 
     /* -------------- Gripper Controller -------------- */
     void gripperRoll(bool direction);
+    void armto0();
 
 /*////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
@@ -67,5 +68,4 @@ class Actuator{
     int _servoState = 60;
 
 };
-
 #endif

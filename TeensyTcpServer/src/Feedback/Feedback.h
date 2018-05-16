@@ -60,7 +60,7 @@ class Feedback{
         float rads[6];
 
         float pi = 3.14159;
-        float r = 0.075;
+        float r = 0.1;
 
 };
 

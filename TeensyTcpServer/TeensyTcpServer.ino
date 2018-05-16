@@ -70,7 +70,7 @@ void setup() {
 	}
 	feedback.encodersInit(&myEnc);
 	//Set next state
-	cState = TEST;
+	cState = IDLE;
 }
 
 void loop() {
@@ -137,6 +137,7 @@ void loop() {
 				}
 			}else{
 				//cState = LOC_UPDATE;
+				cState = FEE_GET_AVG_SPEED;
 			}
 			break;
 
@@ -246,6 +247,13 @@ void loop() {
 			comms.writePrecision(feedback.getChassisYaw(),5);
 			cState = IDLE;
 			break;
+		
+		case FEE_GET_AVG_SPEED:
+			Serial.println(feedback.encodersRead(0));
+			//Serial.println(myEnc.read());
+
+			cState = IDLE;
+			break;
 
 		case LOC_UPDATE:   // Gets updated data from GPS when no requests  are present
 			location.updateData();
@@ -280,7 +288,7 @@ void loop() {
 			cState = IDLE;
 			break;
 		case TEST:
-			Serial.println(feedback.encodersRead(0));
+			
 			break;
 
 		default:

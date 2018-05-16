@@ -122,13 +122,18 @@ void Feedback::encodersInit(Encoder *encoder){
 float Feedback::encodersRead(char i){
     newPosition[i] = _encoder[i].read();
     if (newPosition[i] != oldPosition[i]) {
-        rads[i] = abs(oldPosition[i]-newPosition[i])*(pi/100.0);
+        rads[i] = abs(oldPosition[i]-newPosition[i])*(pi/667.8624);
         rads[i] = rads[i]*r;
         oldPosition[i] = newPosition[i];
     }else{
         rads[i]=0;
     }
-    return rads[i];
+    if(rads[i] > 0.63){
+        return 0.63;
+    }else{
+        return rads[i];
+    }
+    
 }
 
 void Feedback::encodersReadAll(){

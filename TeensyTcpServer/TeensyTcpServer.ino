@@ -250,8 +250,7 @@ void loop() {
 		
 		case FEE_GET_AVG_SPEED:
 			Serial.println(feedback.encodersRead(0));
-			//Serial.println(myEnc.read());
-
+			
 			cState = IDLE;
 			break;
 

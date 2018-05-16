@@ -28,6 +28,7 @@ class Feedback{
         float getChassisRoll();
         float getChassisPitch();
         float getChassisYaw();
+        float getHeading();
 
     private:
         Adafruit_LIS3DH _lis[4];
@@ -40,6 +41,7 @@ class Feedback{
         Adafruit_BMP085_Unified       _bmp   = Adafruit_BMP085_Unified(18001);
         /* Update this with the correct SLP for accurate altitude measurements */
         float _seaLevelPressure = SENSORS_PRESSURE_SEALEVELHPA;
+
 
         sensors_event_t _accel_event;
         sensors_event_t _mag_event;

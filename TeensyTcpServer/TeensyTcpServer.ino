@@ -37,10 +37,12 @@ typedef enum{
 	FEE_GET_CHASS_ROLL,
 	FEE_GET_CHASS_PITCH,
 	FEE_GET_CHASS_YAW,
+	FEE_GET_MAGN_HEADING,   //? 10DOF Magnetometer 
 	LOC_UPDATE,				//? Location
 	LOC_GET_LAT,
 	LOC_GET_LON,
 	LOC_NO_FIX,
+	LOC_GET_HEADING,
 	TEST,
 }ServerStates;
 
@@ -124,15 +126,21 @@ void loop() {
 					case 0x8F:
 						cState = FEE_GET_CHASS_YAW;
 						break;
+					case 0x50:
+						cState = FEE_GET_MAGN_HEADING;
+						break;
 					case 0x11:
 						cState = LOC_GET_LAT;		//? Location
 						break;
 					case 0x51:
 						cState = LOC_GET_LON;
 						break;
+					case 0xD1:
+						cState = LOC_GET_HEADING;
+					
 				}
 			}else{
-				//cState = LOC_UPDATE;
+				cState = LOC_UPDATE;
 			}
 			break;
 
@@ -242,6 +250,11 @@ void loop() {
 			comms.writePrecision(feedback.getChassisYaw(),5);
 			cState = IDLE;
 			break;
+		
+		case FEE_GET_MAGN_HEADING:
+			comms.writePrecision(feedback.getHeading(),5);
+			cState = IDLE;
+			break;
 
 		case LOC_UPDATE:   // Gets updated data from GPS when no requests  are present
 			location.updateData();
@@ -275,6 +288,15 @@ void loop() {
 			// Back to idle
 			cState = IDLE;
 			break;
+
+		case LOC_GET_HEADING:
+			if(location.getFix()){
+				Serial.println("Heading sent");
+				comms.writePrecision(location.getHeading(),5);
+				cState = IDLE;
+			}else{
+				cState = LOC_NO_FIX;
+			}
 		case TEST:
 			Serial.println(actuator.driveGetVoltage(3));
 			break;

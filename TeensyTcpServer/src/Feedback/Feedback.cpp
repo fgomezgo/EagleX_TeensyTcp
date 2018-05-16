@@ -109,3 +109,9 @@ float Feedback::getChassisYaw(){
     chassisImuUpdate();
     return _suspensionsAngle[6];
 }
+
+float Feedback::getHeading(){
+    if (_dof.fusionGetOrientation(&_accel_event,&_mag_event, &_orientation)){
+        return _orientation.heading;
+    }
+}

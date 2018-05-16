@@ -31,8 +31,10 @@ class Feedback{
         float getChassisPitch();
         float getChassisYaw();
         //* Encoders
-        void encodersInit( Encoder *encoder);
+        void encodersInit( Encoder *encL1, Encoder *encL2, Encoder *encL3, Encoder *encR1, Encoder *encR2, Encoder *encR3);
         float encodersRead(char i);
+        float encodersReadLeft();
+        float encodersReadRight();
         void  encodersReadAll();
 
     private:
@@ -53,11 +55,17 @@ class Feedback{
         sensors_vec_t   _orientation;
 
         // Encoders
-
-        Encoder *_encoder;
+        Encoder *_encL1;
+        Encoder *_encL2;
+        Encoder *_encL3;
+        Encoder *_encR1;
+        Encoder *_encR2;
+        Encoder *_encR3;
         long oldPosition[6] = {-999, -999, -999, -999, -999, -999};
         long newPosition[6];
         float rads[6];
+        float _speedLeft;
+        float _speedRight;
 
         float pi = 3.14159;
         float r = 0.1;

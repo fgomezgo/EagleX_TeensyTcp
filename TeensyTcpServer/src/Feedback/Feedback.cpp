@@ -114,37 +114,108 @@ float Feedback::getChassisYaw(){
 
 //* Encoders --------------
 
-void Feedback::encodersInit(Encoder *encoder){
+void Feedback::encodersInit( Encoder *encL1, Encoder *encL2, Encoder *encL3, Encoder *encR1, Encoder *encR2, Encoder *encR3){
     /* Assign a unique ID to the sensors */
-    _encoder = encoder;
+    _encL1 = encL1;
+    _encL2 = encL2;
+    _encL3 = encL3;
+    _encR1 = encR1;
+    _encR2 = encR2;
+    _encR3 = encR3;
+   /*
+    _encoders[0] = encL1;
+    _encoders[1] = encL2;
+    _encoders[2] = encL3;
+    _encoders[3] = encR1;
+    _encoders[4] = encR2;
+    _encoders[5] = encR3;*/
 }
 
-float Feedback::encodersRead(char i){
-    newPosition[i] = _encoder[i].read();
-    if (newPosition[i] != oldPosition[i]) {
-        rads[i] = abs(oldPosition[i]-newPosition[i])*(pi/667.8624);
-        rads[i] = rads[i]*r;
-        oldPosition[i] = newPosition[i];
-    }else{
-        rads[i]=0;
-    }
-    if(rads[i] > 0.63){
-        return 0.63;
-    }else{
-        return rads[i];
-    }
-    
-}
 
-void Feedback::encodersReadAll(){
-    for (int i=0; i<2; i++) {
-        newPosition[i] = _encoder[i].read();
-        if (newPosition[i] != oldPosition[i]) {
-            rads[i] = abs(oldPosition[i]-newPosition[i])*(pi/100.0);
-            rads[i] = rads[i]*r;
-            oldPosition[i] = newPosition[i];
-        }else{
-            rads[i]=0;
+
+float Feedback::encodersReadLeft(){
+    newPosition[0] = _encL1[0].read();
+    newPosition[1] = _encL2[0].read();
+    newPosition[2] = _encL3[0].read();
+    rads[0] = 0;
+    rads[1] = 0;
+    rads[2] = 0;
+    if (newPosition[0] != oldPosition[0]) {
+        rads[0] = abs(oldPosition[0]-newPosition[0])*(pi/667.8624);
+        rads[0] = rads[0]*r;
+        if(rads[0] > 0.63){
+            rads[0] = 0.63;
         }
+        oldPosition[0] = newPosition[0];
+    }else{
+        rads[0]=0;
     }
+
+    if (newPosition[1] != oldPosition[1]) {
+        rads[1] = abs(oldPosition[1]-newPosition[1])*(pi/667.8624);
+        rads[1] = rads[1]*r;
+        if(rads[1] > 0.63){
+            rads[1] = 0.63;
+        }
+        oldPosition[1] = newPosition[1];
+    }else{
+        rads[1]=0;
+    }
+
+    if (newPosition[2] != oldPosition[2]) {
+        rads[2] = abs(oldPosition[2]-newPosition[2])*(pi/333.9312);
+        rads[2] = rads[2]*r;
+        if(rads[2] > 0.63){
+            rads[2] = 0.63;
+        }
+        oldPosition[2] = newPosition[2];
+    }else{
+        rads[2]=0;
+    }
+    //! Change this to return the AVG of threee encoders
+    return rads[2];
+ 
 }
+
+float Feedback::encodersReadRight(){
+    newPosition[3] = _encR1[0].read();
+    newPosition[4] = _encR2[0].read();
+    newPosition[5] = _encR3[0].read();
+
+    if (newPosition[3] != oldPosition[3]) {
+        rads[3] = abs(oldPosition[3]-newPosition[3])*(pi/667.8624);
+        rads[3] = rads[3]*r;
+        if(rads[3] > 0.63){
+            rads[3] = 0.63;
+        }
+        oldPosition[3] = newPosition[3];
+    }else{
+        rads[3]=0;
+    }
+
+    if (newPosition[4] != oldPosition[4]) {
+        rads[4] = abs(oldPosition[4]-newPosition[4])*(pi/667.8624);
+        rads[4] = rads[4]*r;
+        if(rads[4] > 0.63){
+            rads[4] = 0.63;
+        }
+        oldPosition[4] = newPosition[4];
+    }else{
+        rads[4]=0;
+    }
+
+    if (newPosition[5] != oldPosition[5]) {
+        rads[5] = abs(oldPosition[5]-newPosition[5])*(pi/667.8624);
+        rads[5] = rads[5]*r;
+        if(rads[5] > 0.63){
+            rads[5] = 0.63;
+        }
+        oldPosition[5] = newPosition[5];
+    }else{
+        rads[5]=0;
+    }
+    //! Change this to return the AVG of threee encoders
+    return rads[3];
+ 
+}
+

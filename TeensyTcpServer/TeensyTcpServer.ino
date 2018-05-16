@@ -18,7 +18,13 @@ Actuator actuator(5,6);                     // configure SMC  reset and  error p
 char LIS3DH_CS[4] = {20, 21, 22, 23};		//IMU
 Feedback feedback(LIS3DH_CS, 0, 1, 32);
 
-Encoder myEnc(24, 25);
+Encoder encL1(29, 30);
+Encoder encL2(27, 28);
+Encoder encL3(2, 26);
+
+Encoder encR1(24, 25);
+Encoder encR2(37, 38);
+Encoder encR3(35, 36);
 
 // States
 typedef enum{
@@ -68,7 +74,7 @@ void setup() {
 	}else{
 		Serial.println("MSG: 10-DOF detected");
 	}
-	feedback.encodersInit(&myEnc);
+	feedback.encodersInit(&encL1, &encL2, &encL3, &encR1, &encR2, &encR3);
 	//Set next state
 	cState = IDLE;
 }
@@ -249,7 +255,12 @@ void loop() {
 			break;
 		
 		case FEE_GET_AVG_SPEED:
-			Serial.println(feedback.encodersRead(0));
+		
+			Serial.print(feedback.encodersReadLeft());
+			Serial.print(" ");
+			Serial.println(feedback.encodersReadRight());
+			
+			//Serial.println(encL3.read());
 			
 			cState = IDLE;
 			break;

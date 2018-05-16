@@ -112,6 +112,11 @@ float Feedback::getChassisYaw(){
     return _suspensionsAngle[6];
 }
 
+float Feedback::getHeading(){
+    if (_dof.fusionGetOrientation(&_accel_event,&_mag_event, &_orientation)){
+        return _orientation.heading;
+    }
+}
 //* Encoders --------------
 
 void Feedback::encodersInit( Encoder *encL1, Encoder *encL2, Encoder *encL3, Encoder *encR1, Encoder *encR2, Encoder *encR3){

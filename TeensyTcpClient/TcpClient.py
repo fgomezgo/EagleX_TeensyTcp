@@ -30,7 +30,7 @@ class RoverComms():
         self.address = rospy.get_param("~address",('192.168.1.200', 5000))
         rospy.loginfo("Starting socket at: %s" % self.address[0])
         self.socket = socket(AF_INET, SOCK_DGRAM)
-        self.socket.settimeout(1)
+        self.socket.settimeout(10)
         self.rate = rospy.get_param("~rate", 5)
         """ Motor Controllers"""
         rospy.Subscriber('joy', Joy, self.joyCallBack)
@@ -41,6 +41,9 @@ class RoverComms():
         """ Location """
         self.location = rospy.Publisher('rover/coordinates', NavSatFix, queue_size=10)
         #self.pub_rmotor = rospy.Publisher('right_motor/setpoint', Float64, queue_size=10)
+        self.location_heading = rospy.Publisher('location_heading', Float64, queue_size=10)
+        self.feedback_heading = rospy.Publisher('IMU_heading', Float64, queue_size=10)
+        
         
         
         
@@ -90,10 +93,16 @@ class RoverComms():
         self.chassisR = 0
         self.chassisP = 0
         self.chassisY = 0
+        self.IMU_heading = 0
+        """Encoders"""
+        self.speed_Left = 0
+        self.speed_Right = 0
+
         """ Location variables """
         self.navsat = NavSatFix()
         self.time_sec = 0
         self.loc_flag = 0
+        self.loc_heading = 0
 
         ###### main loop  ######
         while not rospy.is_shutdown():
@@ -121,7 +130,7 @@ class RoverComms():
         if self.joyL_change == 1 or self.joyR_change == 1:
             left_speed = 0
             right_speed = 0
-            rospy.loginfo("INFOR: Drive system = Left: %s Right: %s", self.joyL, self.joyR)
+            rospy.loginfo("INFO: Drive system = Left: %s Right: %s", self.joyL, self.joyR)
             data = bytearray([0x00, 0x00,0x00,0x00])
             """ Set left side speed """
             if self.joyL > 0:
@@ -136,12 +145,26 @@ class RoverComms():
                 right_speed = -self.joyR
                 right_speed = right_speed | (1 << 7)
 
-            data = bytearray([0x00, left_speed, right_speed, 0x00])
-
-            self.socket.sendto(data, self.address) #send command to arduino
+            
 
             self.joyL_change = 0
             self.joyR_change = 0
+
+
+            data = bytearray([0x00, left_speed, right_speed, 0x00])
+            self.socket.sendto(data, self.address) #send command to arduino
+        
+            try:
+                data, addr = self.socket.recvfrom(15) #Read response from arduino
+                self.speed_Left = int(data) & 0x7F
+                self.speed_Right = int(data) >> 7
+                
+            except:
+                pass
+            rospy.loginfo("INFO: Real speed= Left: %s Right: %s", self.speed_Left, self.speed_Right)
+
+
+    
 
         ##################### ARM Controllers #####################
         """ Shoulder YAW """
@@ -210,7 +233,6 @@ class RoverComms():
             data = bytearray([0x00,0x00,0x01,0x0C])
             self.socket.sendto(data, self.address) #send command to arduino
             rospy.loginfo("INFO: Gripper moving: CLOSING")
-
         ##################### Cooling System #####################
         if self.OP == 1:
             self.cool_left ^= 1
@@ -256,6 +278,8 @@ class RoverComms():
             self.jointLB = data
         except:
             pass
+        
+        """
 
         data = bytearray([0x00, 0x00, 0x00, 0x0F])  # Suspension Left Back
         self.socket.sendto(data, self.address) #send command to arduino
@@ -281,13 +305,25 @@ class RoverComms():
         except:
             pass
 
+        
+        data = bytearray([0x00, 0x00, 0x00, 0x50])  # Heading
+        self.socket.sendto(data, self.address) #send command to arduino
+        try:
+            data, addr = self.socket.recvfrom(15) #Read response from arduino
+            self.IMU_heading = float(data)
+        except:
+            pass
+
+        self.feedback_heading.publish(self.IMU_heading)
+        
+        
         #print "Acel: " + self.jointRB + " " + self.jointRF +" "+ self.jointLF + " " + self.jointLB +" "+ self.chassisP + " " + self.chassisR + " " + self.chassisY 
 
         self.joints.header = Header()
         self.joints.header.stamp = rospy.Time.now()
 
         #self.joints.position = [float(self.chassisP), float(self.chassisR), float(self.chassisY), float(self.jointRB), float(self.jointLB), float(self.jointRF), float(self.jointLF)]
-        self.joints.position = [0, 0, 0, float(self.jointRB), float(self.jointLB), float(self.jointRF), float(self.jointLF)]
+        self.joints.position = [float(self.chassisR), float(self.chassisP), float(self.chassisY), 0, 0, 0, 0]
         self.joints.velocity = []
         self.joints.effort = []
         self.imu.publish(self.joints)
@@ -297,6 +333,8 @@ class RoverComms():
         """
         ##################### Location #####################
         """
+
+        
         if (rospy.Time.now().secs - self.time_sec) >= 2:
             rospy.loginfo("INFO: Location: Query")
 
@@ -330,7 +368,25 @@ class RoverComms():
 
             self.location.publish(self.navsat)
             self.time_sec = rospy.Time.now().secs
-        """
+            
+             # Get Heading
+             
+            data = bytearray([0x00,0x00,0x00,0xD1])
+            self.socket.sendto(data, self.address) #send command to arduino
+            try:
+                data, addr = self.socket.recvfrom(15) #Read response from arduino
+                if data == "-1" or self.loc_flag == 1:
+                    rospy.loginfo("WARNING: No FIX, Dropping frame")
+                    self.loc_flag = 0
+                else:
+                    self.loc_heading = float(data)
+                    rospy.loginfo("INFO: Heading: Recieved")
+                    #print data
+            except:
+                pass
+            self.location_heading.publish(self.loc_heading)
+            
+        
         
         """        # dx = (l + r) / 2
         # dr = (r - l) / w

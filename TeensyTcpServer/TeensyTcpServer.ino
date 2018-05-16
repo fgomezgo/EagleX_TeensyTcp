@@ -18,6 +18,10 @@ Actuator actuator(5,6);                     // configure SMC  reset and  error p
 char LIS3DH_CS[4] = {20, 21, 22, 23};		//IMU
 Feedback feedback(LIS3DH_CS, 0, 1, 32);
 
+unsigned int real_Speed_Left = 0;
+unsigned int real_Speed_Right = 0;
+unsigned int real_Speed = 0;
+
 Encoder encL1(29, 30);
 Encoder encL2(27, 28);
 Encoder encL3(2, 26);
@@ -46,10 +50,12 @@ typedef enum{
 	FEE_GET_CHASS_PITCH,
 	FEE_GET_CHASS_YAW,		
 	FEE_GET_AVG_SPEED,			//? Encoders
+	FEE_GET_MAGN_HEADING,   //? 10DOF Magnetometer 
 	LOC_UPDATE,				//? Location
 	LOC_GET_LAT,
 	LOC_GET_LON,
 	LOC_NO_FIX,
+	LOC_GET_HEADING,
 	TEST,
 }ServerStates;
 
@@ -90,7 +96,7 @@ void loop() {
 				request = request >> 8;
 				switch(header){  
 					case 0x00:
-						cState = ACT_DRIVE_ALL_SP;		//? SET left and right speed 
+						cState = FEE_GET_AVG_SPEED;		//? SET left and right speed 
 						break;
 					case 0x07:
 						cState = ACT_ARM_SH_YAW; 		//? Arm controllers
@@ -134,16 +140,23 @@ void loop() {
 					case 0x8F:
 						cState = FEE_GET_CHASS_YAW;
 						break;
+					case 0x50:
+						cState = FEE_GET_MAGN_HEADING;
+						break;
 					case 0x11:
 						cState = LOC_GET_LAT;		//? Location
 						break;
 					case 0x51:
 						cState = LOC_GET_LON;
 						break;
+					case 0xD1:
+						cState = LOC_GET_HEADING;
+						break;
+
 				}
 			}else{
-				//cState = LOC_UPDATE;
-				cState = FEE_GET_AVG_SPEED;
+				cState = LOC_UPDATE;
+				
 			}
 			break;
 
@@ -168,7 +181,7 @@ void loop() {
 			Serial.println();
 
 			actuator.driveSetAllSpeed(leftSide, rightSide);
-			cState = IDLE;
+			cState = IDLE;;
 			break;
 		
 		case ACT_ARM_SH_YAW:
@@ -255,13 +268,33 @@ void loop() {
 			break;
 		
 		case FEE_GET_AVG_SPEED:
-		
-			Serial.print(feedback.encodersReadLeft());
-			Serial.print(" ");
-			Serial.println(feedback.encodersReadRight());
+			//comms.writePrecision(feedback.getChassisYaw(),5);
+			
+			//comms.writePrecision(float(real_Speed),2);
+			
+			real_Speed_Left = feedback.encodersReadLeft()*100;
+			real_Speed_Left = real_Speed_Left & 0x7F;
+			real_Speed_Right = feedback.encodersReadRight()*100;
+			real_Speed_Right = real_Speed_Right << 7;
+			real_Speed = real_Speed_Left | real_Speed_Right;
+
+			Serial.println("Left");
+			Serial.println(real_Speed_Left, HEX );
+			Serial.println("-------------------");
+			Serial.println(real_Speed_Right, HEX);
+			Serial.println("---------Speed----------");
+			Serial.println(real_Speed, HEX);
+
+			comms.write(real_Speed);
+
 			
 			//Serial.println(encL3.read());
 			
+			cState = ACT_DRIVE_ALL_SP;
+			break;
+		
+		case FEE_GET_MAGN_HEADING:
+			comms.writePrecision(feedback.getHeading(),5);
 			cState = IDLE;
 			break;
 
@@ -297,6 +330,17 @@ void loop() {
 			// Back to idle
 			cState = IDLE;
 			break;
+		
+		case LOC_GET_HEADING:
+			if(location.getFix()){
+				Serial.println("Heading sent");
+				comms.writePrecision(location.getHeading(),5);
+				cState = IDLE;
+			}else{
+				cState = LOC_NO_FIX;
+			}
+			break;
+
 		case TEST:
 			
 			break;
@@ -305,5 +349,5 @@ void loop() {
 			break;
 	}
 
-	delay(100);
+	//delay(100);
 }

@@ -30,6 +30,8 @@ class Feedback{
         float getChassisRoll();
         float getChassisPitch();
         float getChassisYaw();
+        float getHeading();
+        
         //* Encoders
         void encodersInit( Encoder *encL1, Encoder *encL2, Encoder *encL3, Encoder *encR1, Encoder *encR2, Encoder *encR3);
         float encodersRead(char i);

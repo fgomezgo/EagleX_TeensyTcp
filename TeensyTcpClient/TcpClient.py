@@ -176,8 +176,10 @@ class RoverComms():
         except:
             pass
         rospy.loginfo("INFO: Real speed= Left: %s Right: %s", self.speed_Left, self.speed_Right)
-
-        
+        if self.set_speed_left < 0:
+            self.speed_Left = -self.speed_Left
+        if self.set_speed_right < 0:
+            self.speed_Right = -self.speed_Right
         ##################### PID controllers #####################
         self.pub_pid_state_left.publish(self.speed_Left/100.0)
         #self.pub_pid_setpoint_left.publish(self.)

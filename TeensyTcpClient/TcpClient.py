@@ -43,9 +43,21 @@ class RoverComms():
         #self.pub_rmotor = rospy.Publisher('right_motor/setpoint', Float64, queue_size=10)
         self.location_heading = rospy.Publisher('location_heading', Float64, queue_size=10)
         self.feedback_heading = rospy.Publisher('IMU_heading', Float64, queue_size=10)
+
+        """ Left side controller publisher"""
+        self.pub_pid_state_left = rospy.Publisher('drive_system_left/state', Float64, queue_size=10)
+        self.pub_pid_setpoint_left = rospy.Publisher('drive_system_left/setpoint', Float64, queue_size=10)
+
+        """ Right side controller publisher """
+        self.pub_pid_state_right = rospy.Publisher('drive_system_right/state', Float64, queue_size=10)
+        self.pub_pid_setpoint_right = rospy.Publisher('drive_system_right/setpoint', Float64, queue_size=10)
+
         
-        
-        
+        """ Left side controller subscriber """
+        rospy.Subscriber("drive_system_left/control_effort", Float64, self.left_speed_cb)
+        """ Right side controller subscriber """
+        rospy.Subscriber("drive_system_right/control_effort", Float64, self.right_speed_cb)
+
         
     #############################################################
     def setup(self):
@@ -97,6 +109,10 @@ class RoverComms():
         """Encoders"""
         self.speed_Left = 0
         self.speed_Right = 0
+        """ Real speed """
+        self.set_speed_left = 0
+        self.set_speed_right = 0
+
 
         """ Location variables """
         self.navsat = NavSatFix()
@@ -117,53 +133,55 @@ class RoverComms():
 
         """
         ##################### Drive System Controllers #####################
-        """ Detect change of joysticks """
-        if self.joyL_old != self.joyL:
-            self.joyL_change = 1
-            self.joyL_old = self.joyL
-
-        if self.joyR_old != self.joyR:
-            self.joyR_change = 1
-            self.joyR_old = self.joyR
 
         """ Send current speed """
-        if self.joyL_change == 1 or self.joyR_change == 1:
-            left_speed = 0
-            right_speed = 0
-            rospy.loginfo("INFO: Drive system = Left: %s Right: %s", self.joyL, self.joyR)
-            data = bytearray([0x00, 0x00,0x00,0x00])
-            """ Set left side speed """
-            if self.joyL > 0:
-                left_speed = self.joyL
-            else:
-                left_speed = -self.joyL
-                left_speed = left_speed | (1 << 7)
-            """ Set right side speed """
-            if self.joyR > 0:
-                right_speed = self.joyR
-            else:
-                right_speed = -self.joyR
-                right_speed = right_speed | (1 << 7)
-
-            
-
-            self.joyL_change = 0
-            self.joyR_change = 0
-
-
-            data = bytearray([0x00, left_speed, right_speed, 0x00])
-            self.socket.sendto(data, self.address) #send command to arduino
         
-            try:
-                data, addr = self.socket.recvfrom(15) #Read response from arduino
-                self.speed_Left = int(data) & 0x7F
-                self.speed_Right = int(data) >> 7
-                
-            except:
-                pass
-            rospy.loginfo("INFO: Real speed= Left: %s Right: %s", self.speed_Left, self.speed_Right)
+
+        left_speed = 0
+        right_speed = 0
+        rospy.loginfo("INFO: Drive system = Left: %s Right: %s", self.joyL, self.joyR)
+        data = bytearray([0x00, 0x00,0x00,0x00])
+
+        self.joyL = int(self.set_speed_left)
+        self.joyR = int(self.set_speed_right)
+
+        print str(self.joyL) + " " + str(self.joyR)
+        """ Set left side speed """
+        if self.joyL > 0:
+            left_speed = self.joyL
+        else:
+            left_speed = -self.joyL
+            left_speed = left_speed | (1 << 7)
+        """ Set right side speed """
+        if self.joyR > 0:
+            right_speed = self.joyR
+        else:
+            right_speed = -self.joyR
+            right_speed = right_speed | (1 << 7)
+
+        
+
+        self.joyL_change = 0
+        self.joyR_change = 0
 
 
+        data = bytearray([0x00, left_speed, right_speed, 0x00])
+        self.socket.sendto(data, self.address) #send command to arduino
+    
+        try:
+            data, addr = self.socket.recvfrom(15) #Read response from arduino
+            self.speed_Left = int(data) & 0x7F
+            self.speed_Right = int(data) >> 7
+            
+        except:
+            pass
+        rospy.loginfo("INFO: Real speed= Left: %s Right: %s", self.speed_Left, self.speed_Right)
+
+        
+        ##################### PID controllers #####################
+        self.pub_pid_state_left.publish(self.speed_Left/100.0)
+        #self.pub_pid_setpoint_left.publish(self.)
+        self.pub_pid_state_right.publish(self.speed_Right/100.0)
     
 
         ##################### ARM Controllers #####################
@@ -403,7 +421,7 @@ class RoverComms():
     #############################################################
     def joyCallBack(self, data):
     #############################################################
-        
+        """
         # Left drive system Controllers [0 - 2]
         self.joyL = int(round(data.axes[1] * 100))
         # Right drive system Controllers [3 - 5]
@@ -426,9 +444,19 @@ class RoverComms():
         self.CR = data.buttons[0]
         # Cooling System (Relays)
         self.SH = data.buttons[8]
-        self.OP = data.buttons[9]
+        self.OP = data.buttons[9]"""
 
-        
+    #############################################################
+    def left_speed_cb(self, data):
+    #############################################################
+        self.set_speed_left = data.data
+        print "Left Control: " + str(self.set_speed_left)
+
+    #############################################################
+    def right_speed_cb(self, data):
+    #############################################################
+        self.set_speed_right = data.data
+        print "Right Control: " + str(self.set_speed_right)
     
 #############################################################
 #############################################################

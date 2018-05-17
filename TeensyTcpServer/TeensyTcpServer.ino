@@ -163,9 +163,6 @@ void loop() {
 			break;
 /*////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 		case ACT_ARM:
-			//! ///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
-			Serial.println(request,BIN);
-			//! ///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 			unsigned int shoulder_yaw_en;
 			shoulder_yaw_en = request;
 			shoulder_yaw_en = shoulder_yaw_en & 0x01;
@@ -240,9 +237,6 @@ void loop() {
 			}
 
 			if(gripper_roll_en){
-				//! ///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
-				Serial.println(gripper_roll_dir,BIN);
-				//! ////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 				Serial.println("Gripper ROLL");
 				actuator.gripperRoll(gripper_roll_dir);
 			}
@@ -250,42 +244,7 @@ void loop() {
 				actuator.armto0();
 				cState = IDLE;
 			}
-			/*
-			actuator.shoulderYaw(request);
-			cState = IDLE;
-			*/
 			break;
-		/*
-		case ACT_ARM_SH_PITCH:
-			Serial.println("Shoulder PITCH");
-			actuator.shoulderPitch(request);
-			cState = IDLE;
-			break;
-
-		case ACT_ARM_EL_PITCH:
-			Serial.println("Elbow PITCH");
-			actuator.elbowPitch(request);
-			cState = IDLE;
-			break;
-
-		case ACT_wrist_pitch_en:
-			Serial.println("Wrist PITCH");
-			actuator.wristPitch(request);
-			cState = IDLE;
-			break;
-
-		case ACT_wrist_roll_en:
-			Serial.println("Wrist ROLL");
-			actuator.wristRoll(request);
-			cState = IDLE;
-			break;
-
-		case ACT_gripper_roll_en:
-			Serial.println("Gripper ROLL");
-			actuator.gripperRoll(request);
-			cState = IDLE;
-			break;
-		*/
 /*////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 		case ACT_COOLING_SET:
 			Serial.println("Cooling SET");

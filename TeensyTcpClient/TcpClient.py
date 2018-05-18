@@ -67,6 +67,22 @@ class RoverComms():
         #  Elbow PITCH Controller 8
         self.R1 = 0
         self.R2 = 0
+        # Shoulder YAW  
+        self.PLaR_old = 0
+        # Shoulder PITCH
+        self.L1_old = 0 
+        self.L2_old = 0 
+        #  Elbow PITCH 
+        self.R1_old = 0
+        self.R2_old = 0
+        # Change Shoulder YAW  
+        self.PLaR_change = 0
+        #Change Shoulder PITCH 
+        self.L1_change = 0 
+        self.L2_change = 0 
+        # Change Elbow PITCH 
+        self.R1_change = 0
+        self.R2_change = 0
         """ Gripper Controllers """
         # Wrist PITCH Servo
         self.PUaD = 0
@@ -145,37 +161,96 @@ class RoverComms():
 
         ##################### ARM Controllers #####################
         """ Shoulder YAW """
-        if self.PLaR == 1:
-            data = bytearray([0x00,0x00,0x00,0x07])
-            self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("INFO: Shoulder moving: LEFT")
+        if self.PLaR_old != self.PLaR:
+            self.PLaR_change = 1
+            self.PLaR_old = self.PLaR
 
-        if self.PLaR == -1:
-            data = bytearray([0x00,0x00,0x01,0x07])
-            self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("INFO: Shoulder moving: RIGHT")
-
+                 
+        if self.PLaR_change == 1:
+            speed_Yaw = 0
+            
+            if self.PLaR == -1:
+                speed_Yaw = 100
+                rospy.loginfo("INFO: Shoulder moving: LEFT ")
+            
+            if self.PLaR == 1:
+                speed_Yaw = 100 | (1 << 7)
+                rospy.loginfo("INFO: Shoulder moving: RIGHT ")
+            
+            if self.PLaR == 0:
+                speed_Yaw = 0
+            
+            data = bytearray([0x00,0x00,speed_Yaw,0x07])
+            self.socket.sendto(data, self.address) #send command to arduino    
+            self.PLaR_change = 0
+            
         """ Shoulder PITCH """
-        if self.L1 == 1:
-            data = bytearray([0x00,0x00,0x00,0x08])
-            self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("INFO: Shoulder moving: UP")
+        """if  self.L1_old != self.L1:
+            self.L1_change = 1
+            self.L1_old = self.L1"""
+        
+        if  self.L2_old != self.L2:
+            self.L2_change = 1
+            self.L2_old = self.L2
 
-        if self.L2 == 1:
-            data = bytearray([0x00,0x00,0x01,0x08])
+        """if self.L1_change == 1:
+            speed_L1 = 0
+            if self.L1 == 1:
+                speed_L1 = 80 | (1 << 7)
+                rospy.loginfo("INFO: Shoulder moving: DOWN ")
+            else:
+                speed_L1 = 0
+            
+            data = bytearray([0x00,0x00,speed_L1,0x08])
             self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("INFO: Shoulder moving: DOWN")
+            self.L1_change = 0"""
+        
+        if self.L2_change == 1 :
+            speed_L2 = 0
+            if self.L2 == 1 :
+                speed_L2 = 80
+                rospy.loginfo("INFO: Shoulder moving: UP")
+            else:
+                speed_L2 = 0
+            
+            data = bytearray([0x00,0x00,speed_L2,0x08])
+            self.socket.sendto(data, self.address) #send command to arduino
+            self.L2_change = 0
+
+        
         
         """ Elbow PITCH """
-        if self.R1 == 1:
-            data = bytearray([0x00,0x00,0x00,0x09])
-            self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("INFO: Elbow moving: UP")
+        """ if  self.R1_old != self.R1:
+            self.R1_change = 1
+            self.R1_old = self.R1"""
+        
+        if  self.R2_old != self.R2:
+            self.R2_change = 1
+            self.R2_old = self.R2
 
-        if self.R2 == 1:
-            data = bytearray([0x00,0x00,0x01,0x09])
+        """if self.R1_change == 1:
+            speed_R1 = 0
+            if self.R1 == 1:
+                speed_R1 = 80 
+                rospy.loginfo("INFO: Shoulder moving: DOWN ")
+            else:
+                speed_R1 = 0
+            
+            data = bytearray([0x00,0x00,speed_R1,0x09])
             self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("INFO: Elbow moving: DOWN")
+            self.R1_change = 0"""
+        
+        if self.R2_change == 1 :
+            speed_R2 = 0
+            if self.R2 == 1 :
+                speed_R2 = 80 | (1 << 7)
+                rospy.loginfo("INFO: Shoulder moving: UP")
+            else:
+                speed_R2 = 0 
+            
+            data = bytearray([0x00,0x00,speed_R2,0x09])
+            self.socket.sendto(data, self.address) #send command to arduino
+            self.R2_change = 0
 
         ##################### Gripper Controllers #####################
         """ Wrist PITCH """
@@ -353,7 +428,7 @@ class RoverComms():
         # Right drive system Controllers [3 - 5]
         self.joyR = int(round(data.axes[4] * 100))
         # Shoulder YAW  Controller 6
-        self.PLaR = data.axes[6]
+        self.PLaR = int(data.axes[6])
         # Shoulder PITCH Controller 7
         self.L1 = data.buttons[4] 
         self.L2 = data.buttons[6]

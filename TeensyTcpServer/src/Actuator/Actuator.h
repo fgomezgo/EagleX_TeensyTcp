@@ -40,10 +40,10 @@ class Actuator{
       
     /* -------------- Arm motor controllers -------------- */
     //?: delay works good enough!
-    void shoulderYaw(bool direction);
-    void shoulderPitch(bool direction);
+    void shoulderYaw(int speed_Yaw);
+    void shoulderPitch(int speed_Sh_Pitch);
 
-    void elbowPitch(bool direction);
+    void elbowPitch(int speed_El_Pitch);
 
     /* -------------- Wrist Controller -------------- */
     void wristPitch(bool direction);

@@ -161,20 +161,44 @@ void loop() {
 			break;
 		
 		case ACT_ARM_SH_YAW:
+			int speed_Raw;
+			speed_Raw = request;
+
+			if (speed_Raw >> 7){
+				speed_Raw = speed_Raw & 0x7F;
+				speed_Raw = -speed_Raw;
+			}
 			Serial.println("Shoulder YAW");
-			actuator.shoulderYaw(request);
+			Serial.println(speed_Raw);
+			actuator.shoulderYaw(speed_Raw);
 			cState = IDLE;
 			break;
 		
 		case ACT_ARM_SH_PITCH:
+			int speed_SH_Pitch;
+			speed_SH_Pitch = request;
+
+			if (speed_SH_Pitch >> 7){
+				speed_SH_Pitch = speed_SH_Pitch & 0x7F;
+				speed_SH_Pitch = -speed_SH_Pitch;
+			}
 			Serial.println("Shoulder PITCH");
-			actuator.shoulderPitch(request);
+			Serial.println(speed_SH_Pitch);
+			actuator.shoulderPitch(speed_SH_Pitch);
 			cState = IDLE;
 			break;
 
 		case ACT_ARM_EL_PITCH:
+			int speed_El_Pitch;
+			speed_El_Pitch = request;
+
+			if (speed_El_Pitch >> 7){
+				speed_El_Pitch = speed_El_Pitch & 0x7F;
+				speed_El_Pitch = -speed_El_Pitch;
+			}
 			Serial.println("Elbow PITCH");
-			actuator.elbowPitch(request);
+			Serial.println(speed_El_Pitch);
+			actuator.elbowPitch(speed_El_Pitch);
 			cState = IDLE;
 			break;
 

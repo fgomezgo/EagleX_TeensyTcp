@@ -204,19 +204,36 @@ void loop() {
 
 		case ACT_WRIST_PITCH:
 			Serial.println("Wrist PITCH");
+			Serial.println(request);
 			actuator.wristPitch(request);
 			cState = IDLE;
 			break;
 
 		case ACT_WRIST_ROLL:
+			int speed_Wrs_Roll;
+			speed_Wrs_Roll = request;
+
+			if (speed_Wrs_Roll >> 7){
+				speed_Wrs_Roll = speed_Wrs_Roll & 0x7F;
+				speed_Wrs_Roll = -speed_Wrs_Roll;
+			}
 			Serial.println("Wrist ROLL");
-			actuator.wristRoll(request);
+			Serial.println(speed_Wrs_Roll);
+			actuator.wristRoll(speed_Wrs_Roll);
 			cState = IDLE;
 			break;
 
 		case ACT_GRIPPER_ROLL:
+			int speed_Grip_Roll;
+			speed_Grip_Roll = request;
+
+			if (speed_Grip_Roll >> 7){
+				speed_Grip_Roll = speed_Grip_Roll & 0x7F;
+				speed_Grip_Roll = -speed_Grip_Roll;
+			}
 			Serial.println("Gripper ROLL");
-			actuator.gripperRoll(request);
+			Serial.println(speed_Grip_Roll);
+			actuator.gripperRoll(speed_Grip_Roll);
 			cState = IDLE;
 			break;
 

@@ -150,7 +150,6 @@ void Actuator::elbowPitch(int speed_El_Pitch){
 /* -------------- Wrist Controller -------------- */
 void Actuator::wristPitch(bool direction){
 	//TODO implement servo logic
-	
 	if(direction){
 		_servoState = _servoState - 4;
 	}else{
@@ -159,28 +158,17 @@ void Actuator::wristPitch(bool direction){
 	_wristPitch.write(_servoState);
 }
 
-void Actuator::wristRoll(bool direction){
-	if(direction){
-		driveSetSpeed(40, 9);
-	}else{
-		driveSetSpeed(-40, 9);
-	}
-	delay(200);
-	driveSetSpeed(0, 9);
+void Actuator::wristRoll(int speed_Wrs_Roll){
+	driveSetSpeed(speed_Wrs_Roll, 7);
+	//delay(200);
 }
 
 
 /* -------------- Gripper Controller -------------- */
-void Actuator::gripperRoll(bool direction){
-	delay(100);
-	if(direction){
-		driveSetSpeed(100, 7);
-	}else{
-		driveSetSpeed(-100, 7);
-	}
-	delay(100);
-	driveSetSpeed(0, 7);
-}
+void Actuator::gripperRoll(int speed_Gri_Roll){
+	driveSetSpeed(speed_Gri_Roll, 9);
+	//delay(200);
+}	
 
 /* -------------- Cooling System -------------- */
 

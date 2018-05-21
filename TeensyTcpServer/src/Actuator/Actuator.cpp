@@ -35,7 +35,7 @@ void Actuator::controllerConfigureReset(){
 	// clear the safe-start violation and let the motor run
 	controllerExitSafeStart();
 	_wristPitch.attach(14);
-	_wristPitch.write(_servoState);
+	_wristPitch.write(92);
 }
 // Used to read incoming information from the SMC
 int Actuator::controllerReadByte(){
@@ -152,8 +152,14 @@ void Actuator::wristPitch(bool direction){
 	//TODO implement servo logic
 	if(direction){
 		_servoState = _servoState - 4;
+		if(_servoState < 28){
+			_servoState = 28;
+		}
 	}else{
 		_servoState = _servoState + 4;
+		if(_servoState > 120){
+			_servoState = 120;
+		}
 	}
 	_wristPitch.write(_servoState);
 }

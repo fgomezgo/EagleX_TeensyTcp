@@ -11,6 +11,9 @@ from sensor_msgs.msg import Joy
 from sensor_msgs.msg import NavSatFix
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Header
+from diagnostic_msgs.msg import DiagnosticArray
+from diagnostic_msgs.msg import DiagnosticStatus
+from diagnostic_msgs.msg import KeyValue
 
 import time 
 
@@ -40,6 +43,8 @@ class RoverComms():
         self.joints.name = ['base_link_to_base_pitch', 'base_pitch_to_base_roll', 'base_roll_to_chasis', 'chasis_to_right', 'chasis_to_left', 'chasis_to_right2', 'chasis_to_left2']
         """ Location """
         self.location = rospy.Publisher('rover/coordinates', NavSatFix, queue_size=10)
+        """ Status """
+        self.current_status = rospy.Publisher('/diagnostics', DiagnosticArray, queue_size=10)
         #self.pub_rmotor = rospy.Publisher('right_motor/setpoint', Float64, queue_size=10)
         
         
@@ -130,6 +135,7 @@ class RoverComms():
         self.time_sec = 0
         self.loc_flag = 0
 
+       
         ###### main loop  ######
         while not rospy.is_shutdown():
             self.synch()
@@ -455,6 +461,37 @@ class RoverComms():
                 pass
 
             self.location.publish(self.navsat)
+            ##################### Status #####################
+            """ Create blank diagnostics """
+            self.generic_diagnostic_array = DiagnosticArray()
+            self.generic_diagnostic_status = DiagnosticStatus()
+            self.generic_key_value = KeyValue()
+            # Generate header
+            self.generic_diagnostic_array.header = Header()
+            
+            """ Get temperature """
+            data = bytearray([0x00,0x00,0x00,0x47])
+            self.socket.sendto(data, self.address) #send command to arduino
+            try:
+                data, addr = self.socket.recvfrom(33) #Read response from arduino
+                print data
+            except:
+                pass
+            
+            self.generic_diagnostic_status.level = 0
+            self.generic_diagnostic_status.name = 'Hola'
+            self.generic_diagnostic_status.message = 'Estas bien guapo inge'
+            self.generic_diagnostic_status.hardware_id = '1'
+            self.generic_key_value.key = 'hola'
+            self.generic_key_value.value = 'valor chido'
+            self.generic_diagnostic_status.values.append(self.generic_key_value)
+            self.generic_diagnostic_array.status.append(self.generic_diagnostic_status)
+            
+            # Publish 
+            self.current_status.publish(self.generic_diagnostic_array)
+
+
+
             self.time_sec = rospy.Time.now().secs
         
         """        # dx = (l + r) / 2

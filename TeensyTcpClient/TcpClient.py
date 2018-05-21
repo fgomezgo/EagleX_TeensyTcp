@@ -73,7 +73,7 @@ class RoverComms():
         self.L2_old = 0 
         self.L1_change = 0 
         self.L2_change = 0
-        self.L1_L2_sepeed = 0
+        self.L1_L2_speed = 0
 
         #  Elbow PITCH Controller 5
         self.R1 = 0
@@ -82,36 +82,35 @@ class RoverComms():
         self.R2_old = 0
         self.R1_change = 0
         self.R2_change = 0
-        self.R1_R2_sepeed = 0
-
-        
-        
+        self.R1_R2_speed = 0
 
         """ Gripper Controllers """
         # Wrist PITCH Servo
         self.PUaD = 0
-        # Wrist ROLL (Drill) Controller 9
+        self.PUaD_old = 0
+        self.PUaD_change = 0
+        self.PUaD_speed = 0
+        self.PUaD_trigger = 0
+
+        # Wrist ROLL (Drill) Controller 7
         self.SQ = 0
         self.CI = 0
-        # Gripper ROLL (Finger) Controller 10
-        self.TR = 0
-        self.CR = 0
-        # Wrist PITCH Servo
-        self.PUaD_old = 0
-        # Wrist ROLL (Drill) 
         self.SQ_old = 0
         self.CI_old = 0
-        # Gripper ROLL (Finger) 
-        self.TR_old = 0
-        self.CR_old = 0
-        # Wrist PITCH Servo
-        self.PUaD_change = 0
-        # Wrist ROLL (Drill) 
         self.SQ_change = 0
         self.CI_change = 0
-        # Gripper ROLL (Finger) 
+        self.WRIST_ROLL_speed = 0
+
+        # Gripper ROLL (Finger) Controller 9
+        self.TR = 0
+        self.CR = 0
+        self.TR_old = 0
+        self.CR_old = 0
         self.TR_change = 0
         self.CR_change = 0
+        self.GRIPPER_ROLL_speed = 0
+
+        
         """ Cooling System """
         self.SH = 0
         self.OP = 0
@@ -208,17 +207,17 @@ class RoverComms():
 
         if self.L1_change == 1:
             if self.L1 == 1:
-                self.L1_L2_sepeed = 80 
+                self.L1_L2_speed = 80 
                 rospy.loginfo("INFO: Shoulder moving: DOWN ")
             else:
-                self.L1_L2_sepeed = 0
+                self.L1_L2_speed = 0
         
         if self.L2_change == 1 :
             if self.L2 == 1 :
-                self.L1_L2_sepeed = 80 | (1 << 7)
+                self.L1_L2_speed = 80 | (1 << 7)
                 rospy.loginfo("INFO: Shoulder moving: UP")
             else:
-                self.L1_L2_sepeed = 0
+                self.L1_L2_speed = 0
 
         """ Elbow PITCH """
         if  self.R1_old != self.R1:
@@ -231,23 +230,23 @@ class RoverComms():
 
         if self.R1_change == 1:
             if self.R1 == 1:
-                self.R1_R2_sepeed = 80 | (1 << 7)
+                self.R1_R2_speed = 80 | (1 << 7)
                 rospy.loginfo("INFO: Shoulder moving: DOWN ")
             else:
-                self.R1_R2_sepeed = 0
+                self.R1_R2_speed = 0
         
         if self.R2_change == 1 :
             if self.R2 == 1 :
-                self.R1_R2_sepeed = 80 
+                self.R1_R2_speed = 80 
                 rospy.loginfo("INFO: Shoulder moving: UP")
             else:
-                self.R1_R2_sepeed = 0 
+                self.R1_R2_speed = 0 
 
         if (self.PLaR_change == 1) or (self.L1_change == 1) or (self.L2_change == 1) or (self.R1_change == 1) or (self.R2_change == 1):
             # Print speed
-            rospy.loginfo("INFO: Shoulder yaw: %s Shoulder pitch: %s Elbow pitch: %s", self.PLaR_speed, self.L1_L2_sepeed, self.R1_R2_sepeed)
+            rospy.loginfo("INFO: Shoulder yaw: %s Shoulder pitch: %s Elbow pitch: %s", self.PLaR_speed, self.L1_L2_speed, self.R1_R2_speed)
             # Concatenate values
-            data = bytearray([self.R1_R2_sepeed, self.L1_L2_sepeed, self.PLaR_speed, 0x07])
+            data = bytearray([self.R1_R2_speed, self.L1_L2_speed, self.PLaR_speed, 0x07])
             self.socket.sendto(data, self.address) #send command to arduino
             # Reset changes
             self.PLaR_change = 0
@@ -258,16 +257,25 @@ class RoverComms():
 
         ##################### Gripper Controllers #####################
         """ Wrist PITCH """
-        if self.PUaD == 1:
-            data = bytearray([0x00,0x00,0x00,0x0A])
-            self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("INFO: Wrist moving: UP")
-
         if self.PUaD == -1:
-            data = bytearray([0x00,0x00,0x01,0x0A])
-            self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("INFO: Wrist moving: DOWN")
-            
+            self.PUaD_speed = 0x01
+            self.PUaD_change = 1
+            self.PUaD_trigger = 0
+            rospy.loginfo("INFO: Wrist moving: DOWN ")
+        
+        if self.PUaD == 1:
+            self.PUaD_speed = 0x02
+            self.PUaD_change = 1
+            self.PUaD_trigger = 0
+            rospy.loginfo("INFO: Wrist moving: UP ")
+        
+        if self.PUaD == 0:
+            self.PUaD_speed = 0x00
+            if(self.PUaD_trigger == 0):
+                self.PUaD_change = 1
+                self.PUaD_trigger = 1
+            else:
+                self.PUaD_change = 0
 
         """ Wrist ROLL (Drill) """
         if  self.SQ_old != self.SQ:
@@ -279,28 +287,26 @@ class RoverComms():
             self.CI_old = self.CI
 
         if self.SQ_change == 1:
-            speed_SQ = 0
             if self.SQ == 1:
-                speed_SQ = 40 | (1 << 7)
+                self.WRIST_ROLL_speed = 40 | (1 << 7)
                 rospy.loginfo("INFO: Wrist moving: ROLL LEFT")
             else:
-                speed_SQ = 0
+                self.WRIST_ROLL_speed = 0
             
-            data = bytearray([0x00,0x00,speed_SQ,0x0B])
+            data = bytearray([0x00,0x00,self.WRIST_ROLL_speed,0x0B])
             self.socket.sendto(data, self.address) #send command to arduino
-            self.SQ_change = 0
+            
         
         if self.CI_change == 1 :
-            speed_CI = 0
             if self.CI == 1 :
-                speed_CI = 40 
+                self.WRIST_ROLL_speed = 40 
                 rospy.loginfo("INFO: Wrist moving: ROLL RIGHT")
             else:
-                speed_CI = 0 
+                self.WRIST_ROLL_speed = 0 
             
-            data = bytearray([0x00,0x00,speed_CI,0x0B])
+            data = bytearray([0x00,0x00,self.WRIST_ROLL_speed,0x0B])
             self.socket.sendto(data, self.address) #send command to arduino
-            self.CI_change = 0
+            
 
 
         """ Gripper ROLL """
@@ -313,29 +319,39 @@ class RoverComms():
             self.CR_old = self.CR
 
         if self.TR_change == 1:
-            speed_TR = 0
             if self.TR == 1:
-                speed_TR = 100 | (1 << 7)
+                self.GRIPPER_ROLL_speed = 100 | (1 << 7)
                 rospy.loginfo("INFO: Gripper moving: OPENING")
             else:
-                speed_TR = 0
+                self.GRIPPER_ROLL_speed = 0
             
-            data = bytearray([0x00,0x00,speed_TR,0x0C])
+            data = bytearray([0x00,0x00,self.GRIPPER_ROLL_speed,0x0C])
             self.socket.sendto(data, self.address) #send command to arduino
-            self.TR_change = 0
+            
         
         if self.CR_change == 1 :
-            speed_CR = 0
             if self.CR == 1 :
-                speed_CR = 100 
+                self.GRIPPER_ROLL_speed = 100 
                 rospy.loginfo("INFO: Gripper moving: CLOSING")
             else:
-                speed_CR = 0 
+                self.GRIPPER_ROLL_speed = 0 
             
-            data = bytearray([0x00,0x00,speed_CR,0x0C])
+            data = bytearray([0x00,0x00,self.GRIPPER_ROLL_speed,0x0C])
             self.socket.sendto(data, self.address) #send command to arduino
+            
+        
+        if (self.PUaD_change == 1) or (self.SQ_change == 1) or (self.CI_change == 1) or (self.TR_change == 1) or (self.CR_change == 1):
+            # Print speed
+            rospy.loginfo("INFO: Wrist yaw: %s Wrist roll: %s Gripper Roll: %s", self.PUaD_speed, self.WRIST_ROLL_speed, self.GRIPPER_ROLL_speed)
+            # Concatenate values
+            data = bytearray([self.GRIPPER_ROLL_speed, self.WRIST_ROLL_speed, self.PUaD_speed, 0x08])
+            self.socket.sendto(data, self.address) #send command to arduino
+            # Reset changes
+            self.PUaD_change = 0
+            self.SQ_change = 0
+            self.CI_change = 0
+            self.TR_change = 0
             self.CR_change = 0
-
             
 
         ##################### Cooling System #####################

@@ -6,7 +6,7 @@
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEE}; //Assign a mac address
 IPAddress ip(192, 168, 1, 200); //Assign my IP adress
 unsigned int localPort = 5000; //Assign a Port to talk over
-unsigned int request;
+unsigned long request;
 byte header;
 
 unsigned int instruction;
@@ -22,7 +22,7 @@ Feedback feedback(LIS3DH_CS, 0, 1, 32);
 typedef enum{
 	IDLE,     // Awaits for communication  and gets the id
 	ACT_DRIVE_ALL_SP,		//? Drive System Controllers
-	ACT_ARM_SH_YAW,			//? ARM Controllers
+	ACT_ARM_ALL_SP,			//? ARM Controllers (Arm yaw, Shoulder pitch, Elbow pitch)
 	ACT_ARM_SH_PITCH,
 	ACT_ARM_EL_PITCH,
 	ACT_WRIST_PITCH,		//? Wrist Controllers
@@ -83,7 +83,7 @@ void loop() {
 						cState = ACT_DRIVE_ALL_SP;		//? SET left and right speed 
 						break;
 					case 0x07:
-						cState = ACT_ARM_SH_YAW; 		//? Arm controllers
+						cState = ACT_ARM_ALL_SP; 		//? Arm controllers
 						break;
 					case 0x08:
 						cState = ACT_ARM_SH_PITCH; 		
@@ -160,17 +160,38 @@ void loop() {
 			cState = IDLE;
 			break;
 		
-		case ACT_ARM_SH_YAW:
-			int speed_Raw;
-			speed_Raw = request;
-
-			if (speed_Raw >> 7){
-				speed_Raw = speed_Raw & 0x7F;
-				speed_Raw = -speed_Raw;
+		case ACT_ARM_ALL_SP:
+			int shoulderYaw_speed, shoulderPitch_speed, elbowPitch_speed;
+			Serial.println(request,HEX);
+			// Get individual speeds
+			shoulderYaw_speed = request & 0xFF;
+			shoulderPitch_speed = (request >> 8) & 0xFF;
+			elbowPitch_speed = (request >> 16);
+			// Parse direction
+			if (shoulderYaw_speed >> 7){
+				shoulderYaw_speed = shoulderYaw_speed & 0x7F;
+				shoulderYaw_speed = -shoulderYaw_speed;
 			}
-			Serial.println("Shoulder YAW");
-			Serial.println(speed_Raw);
-			actuator.shoulderYaw(speed_Raw);
+			if (shoulderPitch_speed >> 7){
+				shoulderPitch_speed = shoulderPitch_speed & 0x7F;
+				shoulderPitch_speed = -shoulderPitch_speed;
+			}
+			if (elbowPitch_speed >> 7){
+				elbowPitch_speed = elbowPitch_speed & 0x7F;
+				elbowPitch_speed = -elbowPitch_speed;
+			}
+			Serial.print("ARM MOVING: ");
+			Serial.print("SH Yaw: ");
+			Serial.print(shoulderYaw_speed);
+			Serial.print(" SH Pitch: ");
+			Serial.print(shoulderPitch_speed);
+			Serial.print(" EL Pitch: ");
+			Serial.println(elbowPitch_speed);
+			// Set actuator speed
+			actuator.shoulderYaw(shoulderYaw_speed);
+			actuator.shoulderPitch(shoulderPitch_speed);
+			actuator.elbowPitch(elbowPitch_speed);
+
 			cState = IDLE;
 			break;
 		

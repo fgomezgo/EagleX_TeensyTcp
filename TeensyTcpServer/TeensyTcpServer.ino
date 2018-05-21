@@ -116,7 +116,7 @@ void loop() {
 						break;
 				}
 			}else{
-				//cState = LOC_UPDATE;
+				cState = LOC_UPDATE;
 			}
 			break;
 
@@ -214,7 +214,6 @@ void loop() {
 			}
 			actuator.wristRoll(wristRoll_speed);
 			actuator.gripperRoll(gripperRoll_speed);
-			
 			cState = IDLE;
 			break;
 

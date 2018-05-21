@@ -292,10 +292,6 @@ class RoverComms():
                 rospy.loginfo("INFO: Wrist moving: ROLL LEFT")
             else:
                 self.WRIST_ROLL_speed = 0
-            
-            data = bytearray([0x00,0x00,self.WRIST_ROLL_speed,0x0B])
-            self.socket.sendto(data, self.address) #send command to arduino
-            
         
         if self.CI_change == 1 :
             if self.CI == 1 :
@@ -304,10 +300,6 @@ class RoverComms():
             else:
                 self.WRIST_ROLL_speed = 0 
             
-            data = bytearray([0x00,0x00,self.WRIST_ROLL_speed,0x0B])
-            self.socket.sendto(data, self.address) #send command to arduino
-            
-
 
         """ Gripper ROLL """
         if  self.TR_old != self.TR:
@@ -324,10 +316,6 @@ class RoverComms():
                 rospy.loginfo("INFO: Gripper moving: OPENING")
             else:
                 self.GRIPPER_ROLL_speed = 0
-            
-            data = bytearray([0x00,0x00,self.GRIPPER_ROLL_speed,0x0C])
-            self.socket.sendto(data, self.address) #send command to arduino
-            
         
         if self.CR_change == 1 :
             if self.CR == 1 :
@@ -336,10 +324,6 @@ class RoverComms():
             else:
                 self.GRIPPER_ROLL_speed = 0 
             
-            data = bytearray([0x00,0x00,self.GRIPPER_ROLL_speed,0x0C])
-            self.socket.sendto(data, self.address) #send command to arduino
-            
-        
         if (self.PUaD_change == 1) or (self.SQ_change == 1) or (self.CI_change == 1) or (self.TR_change == 1) or (self.CR_change == 1):
             # Print speed
             rospy.loginfo("INFO: Wrist yaw: %s Wrist roll: %s Gripper Roll: %s", self.PUaD_speed, self.WRIST_ROLL_speed, self.GRIPPER_ROLL_speed)
@@ -439,7 +423,6 @@ class RoverComms():
         self.time_nsec = rospy.Time.now().secs
         """
         ##################### Location #####################
-        """
         if (rospy.Time.now().secs - self.time_sec) >= 2:
             rospy.loginfo("INFO: Location: Query")
 
@@ -473,7 +456,6 @@ class RoverComms():
 
             self.location.publish(self.navsat)
             self.time_sec = rospy.Time.now().secs
-        """
         
         """        # dx = (l + r) / 2
         # dr = (r - l) / w

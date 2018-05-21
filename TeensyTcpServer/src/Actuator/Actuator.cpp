@@ -73,23 +73,23 @@ void Actuator::driveSetAllSpeed(int speedLeft, int speedRight){
 }
 
 // Returns avg voltage of all SMC at the rover
-unsigned int Actuator::driveGetAvgVoltage(){
-	unsigned int avg = 0;
-	for(int i=0; i < 8; i++){
+float Actuator::driveGetAvgVoltage(){
+	float avg = 0;
+	for(int i=1; i < 12; i++){
 		avg += controllerGetVariable(INPUT_VOLTAGE, i);
 		delay(1); // Is it needed?
 	}
-	return avg/8;
+	return avg/11.0;
 }
 
 // Returns the average temperature of all SMC
-unsigned int Actuator::driveGetAvgTemp(){
-	unsigned int avg = 0;
-	for(int i=0; i < 8; i++){
+float Actuator::driveGetAvgTemp(){
+	float avg = 0;
+	for(int i=1; i < 12; i++){
 		avg += controllerGetVariable(TEMPERATURE, i);
 		delay(1); // Is it needed?
 	}
-	return avg/8;
+	return avg/11.0;
 }
 
 // Returns value of ERR pin 

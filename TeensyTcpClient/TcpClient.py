@@ -148,6 +148,15 @@ class RoverComms():
         Escribir algo useful
 
         """
+        ##################### Status #####################
+        """ Create blank diagnostics """
+        self.generic_diagnostic_array = DiagnosticArray()
+        self.generic_diagnostic_status = DiagnosticStatus()
+        self.generic_key_value = KeyValue()
+        # Generate header
+        self.generic_diagnostic_array.header = Header()
+        
+        
         ##################### Drive System Controllers #####################
         """ Detect change of joysticks """
         if self.joyL_old != self.joyL:
@@ -180,7 +189,27 @@ class RoverComms():
             data = bytearray([0x00, left_speed, right_speed, 0x00])
 
             self.socket.sendto(data, self.address) #send command to arduino
+            try:
+                data, addr = self.socket.recvfrom(25) #Read response from arduino
+                self.generic_diagnostic_status.level = 0
+                self.generic_diagnostic_status.name = 'Motor Controllers  avg V/Temp'
+                self.generic_diagnostic_status.message = 'Average voltage and temperature of drivers'
+                self.generic_diagnostic_status.hardware_id = '1'
+                # Add values
+                self.sh_yaw_temp_key_value = KeyValue()
+                self.sh_yaw_temp_key_value.key = 'AVG Voltage:'
+                self.sh_yaw_temp_key_value.value = str(float(data[0:3])/10.0) + ' C'
+                self.generic_diagnostic_status.values.append(self.sh_yaw_temp_key_value)
 
+                self.sh_pitch_temp_key_value = KeyValue()
+                self.sh_pitch_temp_key_value.key = 'AVG Temp:'
+                self.sh_pitch_temp_key_value.value = str(float(data[3:8])/1000.0) + ' V'
+                self.generic_diagnostic_status.values.append(self.sh_pitch_temp_key_value)
+
+                #Append other diagnostics
+                self.generic_diagnostic_array.status.append(self.generic_diagnostic_status)
+            except:
+                pass
             self.joyL_change = 0
             self.joyR_change = 0
 
@@ -254,12 +283,15 @@ class RoverComms():
             # Concatenate values
             data = bytearray([self.R1_R2_speed, self.L1_L2_speed, self.PLaR_speed, 0x07])
             self.socket.sendto(data, self.address) #send command to arduino
+            
             # Reset changes
             self.PLaR_change = 0
             self.L1_change = 0
             self.L2_change = 0
             self.R1_change = 0
             self.R2_change = 0
+        
+        
 
         ##################### Gripper Controllers #####################
         """ Wrist PITCH """
@@ -429,6 +461,7 @@ class RoverComms():
         self.time_nsec = rospy.Time.now().secs
         """
         ##################### Location #####################
+        """
         if (rospy.Time.now().secs - self.time_sec) >= 2:
             rospy.loginfo("INFO: Location: Query")
 
@@ -444,8 +477,9 @@ class RoverComms():
                     #print data
             except:
                 pass
-
+        """
             # Get Longitude 
+        """
             data = bytearray([0x00,0x00,0x00,0x51])
             self.socket.sendto(data, self.address) #send command to arduino
             try:
@@ -461,38 +495,11 @@ class RoverComms():
                 pass
 
             self.location.publish(self.navsat)
-            ##################### Status #####################
-            """ Create blank diagnostics """
-            self.generic_diagnostic_array = DiagnosticArray()
-            self.generic_diagnostic_status = DiagnosticStatus()
-            self.generic_key_value = KeyValue()
-            # Generate header
-            self.generic_diagnostic_array.header = Header()
-            
-            """ Get temperature """
-            data = bytearray([0x00,0x00,0x00,0x47])
-            self.socket.sendto(data, self.address) #send command to arduino
-            try:
-                data, addr = self.socket.recvfrom(33) #Read response from arduino
-                print data
-            except:
-                pass
-            
-            self.generic_diagnostic_status.level = 0
-            self.generic_diagnostic_status.name = 'Hola'
-            self.generic_diagnostic_status.message = 'Estas bien guapo inge'
-            self.generic_diagnostic_status.hardware_id = '1'
-            self.generic_key_value.key = 'hola'
-            self.generic_key_value.value = 'valor chido'
-            self.generic_diagnostic_status.values.append(self.generic_key_value)
-            self.generic_diagnostic_array.status.append(self.generic_diagnostic_status)
-            
-            # Publish 
-            self.current_status.publish(self.generic_diagnostic_array)
-
-
 
             self.time_sec = rospy.Time.now().secs
+        """
+        # Publish 
+        self.current_status.publish(self.generic_diagnostic_array)
         
         """        # dx = (l + r) / 2
         # dr = (r - l) / w

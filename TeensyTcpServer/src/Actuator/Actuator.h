@@ -27,8 +27,8 @@ class Actuator{
     void driveSetAllSpeed(int speedLeft, int speedRight);
 
     //TODO Implement  separate functions for drive system temps and arm
-    unsigned int driveGetAvgVoltage();
-    unsigned int driveGetAvgTemp();
+    float driveGetAvgVoltage();
+    float driveGetAvgTemp();
     bool driveGetError();
     
 

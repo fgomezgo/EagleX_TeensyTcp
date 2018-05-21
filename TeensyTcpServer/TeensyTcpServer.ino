@@ -14,7 +14,7 @@ String datReq; //String for our data
 Comms comms(ip, mac, localPort);      //  Ethernet module object
 Location location(1);                 // GPS module object
 Actuator actuator(5,6);                     // configure SMC  reset and  error pins
-
+String data = "";
 char LIS3DH_CS[4] = {20, 21, 22, 23};		//IMU
 Feedback feedback(LIS3DH_CS, 0, 1, 32);
 
@@ -116,7 +116,7 @@ void loop() {
 						break;
 				}
 			}else{
-				cState = LOC_UPDATE;
+				//cState = LOC_UPDATE;
 			}
 			break;
 
@@ -139,8 +139,11 @@ void loop() {
 			Serial.print("right: ");
 			Serial.print(rightSide);
 			Serial.println();
-
+			data = String(actuator.driveGetTemp(2)) + String(actuator.driveGetVoltage(2));
+			//Serial.println(actuator.driveGetTemp(2));
+			comms.write(data);
 			actuator.driveSetAllSpeed(leftSide, rightSide);
+			
 			cState = IDLE;
 			break;
 		
@@ -175,7 +178,6 @@ void loop() {
 			actuator.shoulderYaw(shoulderYaw_speed);
 			actuator.shoulderPitch(shoulderPitch_speed);
 			actuator.elbowPitch(elbowPitch_speed);
-
 			cState = IDLE;
 			break;
 		

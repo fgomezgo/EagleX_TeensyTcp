@@ -2,8 +2,8 @@
     <!-- Controller for drone's X axis -->
     <node name="controller" pkg="pid" type="controller" ns="drive_system_left" output="screen" >
       <param name="node_name" value="rover_left_side" />
-      <param name="Kp" value="60.0" />
-      <param name="Ki" value="70.0" />
+      <param name="Kp" value="28.0" />
+      <param name="Ki" value="50.0" />
       <param name="Kd" value="0.0" />
       <param name="upper_limit" value="100" />
       <param name="lower_limit" value="-100" />
@@ -18,8 +18,8 @@
 
     <node name="controller" pkg="pid" type="controller" ns="drive_system_right" output="screen" >
       <param name="node_name" value="rover_right_side" />
-      <param name="Kp" value="60.0" />
-      <param name="Ki" value="70.0" />
+      <param name="Kp" value="28.0" />
+      <param name="Ki" value="50.0" />
       <param name="Kd" value="0.0" />
       <param name="upper_limit" value="100" />
       <param name="lower_limit" value="-100" />

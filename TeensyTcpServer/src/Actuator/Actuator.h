@@ -40,17 +40,16 @@ class Actuator{
       
     /* -------------- Arm motor controllers -------------- */
     //?: delay works good enough!
-    void shoulderYaw(bool direction);
-    void shoulderPitch(bool direction);
-
-    void elbowPitch(bool direction);
+    void shoulderYaw(int speed_Yaw);
+    void shoulderPitch(int speed_Sh_Pitch);
+    void elbowPitch(int speed_El_Pitch);
 
     /* -------------- Wrist Controller -------------- */
     void wristPitch(bool direction);
-    void wristRoll(bool direction);
+    void wristRoll(int speed_Wrs_Roll);
 
     /* -------------- Gripper Controller -------------- */
-    void gripperRoll(bool direction);
+    void gripperRoll(int speed_Gri_Roll);
 
 
     /* -------------- Cooling System -------------- */
@@ -62,7 +61,7 @@ class Actuator{
     char _resetPin;
     char _errPin;
     Servo _wristPitch;
-    int _servoState = 60;
+    int _servoState = 60;    
 
 };
 

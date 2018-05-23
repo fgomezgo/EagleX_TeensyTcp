@@ -35,7 +35,7 @@ void Actuator::controllerConfigureReset(){
 	// clear the safe-start violation and let the motor run
 	controllerExitSafeStart();
 	_wristPitch.attach(14);
-	_wristPitch.write(_servoState);
+	_wristPitch.write(92);
 }
 // Used to read incoming information from the SMC
 int Actuator::controllerReadByte(){
@@ -130,70 +130,51 @@ void Actuator::driveSetSpeed(int percentage, unsigned char device){
 }
 
 /* -------------- Arm motor controllers -------------- */
-void Actuator::shoulderYaw(bool direction){
-	if(direction){
-		driveSetSpeed(100, 4);
-	}else{
-		driveSetSpeed(-100, 4);
-	}
-	delay(200);
-	driveSetSpeed(0, 4);
+void Actuator::shoulderYaw(int speed_Yaw){
+	driveSetSpeed(speed_Yaw, 4);
+	//delay(200);
+	
 }
 
-void Actuator::shoulderPitch(bool direction){
-	if(direction){
-		driveSetSpeed(80, 6);
-	}else{
-		driveSetSpeed(-80, 6);
-	}
-	delay(200);
-	driveSetSpeed(0, 6);
+void Actuator::shoulderPitch(int speed_Sh_Pitch){
+	driveSetSpeed(speed_Sh_Pitch, 6);
+	//delay(200);
+
 }
 
-void Actuator::elbowPitch(bool direction){
-	if(direction){
-		driveSetSpeed(-80, 5);
-	}else{
-		driveSetSpeed(80, 5);
-	}
-	delay(200);
-	driveSetSpeed(0, 5);
+void Actuator::elbowPitch(int speed_El_Pitch){
+	driveSetSpeed(speed_El_Pitch, 5);
+	//delay(200);
 }
 
 /* -------------- Wrist Controller -------------- */
 void Actuator::wristPitch(bool direction){
 	//TODO implement servo logic
-	
 	if(direction){
 		_servoState = _servoState - 4;
+		if(_servoState < 28){
+			_servoState = 28;
+		}
 	}else{
 		_servoState = _servoState + 4;
+		if(_servoState > 120){
+			_servoState = 120;
+		}
 	}
 	_wristPitch.write(_servoState);
 }
 
-void Actuator::wristRoll(bool direction){
-	if(direction){
-		driveSetSpeed(40, 9);
-	}else{
-		driveSetSpeed(-40, 9);
-	}
-	delay(200);
-	driveSetSpeed(0, 9);
+void Actuator::wristRoll(int speed_Wrs_Roll){
+	driveSetSpeed(speed_Wrs_Roll, 7);
+	//delay(200);
 }
 
 
 /* -------------- Gripper Controller -------------- */
-void Actuator::gripperRoll(bool direction){
-	delay(100);
-	if(direction){
-		driveSetSpeed(100, 7);
-	}else{
-		driveSetSpeed(-100, 7);
-	}
-	delay(100);
-	driveSetSpeed(0, 7);
-}
+void Actuator::gripperRoll(int speed_Gri_Roll){
+	driveSetSpeed(speed_Gri_Roll, 9);
+	//delay(200);
+}	
 
 /* -------------- Cooling System -------------- */
 

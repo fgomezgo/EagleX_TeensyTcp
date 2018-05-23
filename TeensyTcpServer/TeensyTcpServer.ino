@@ -6,15 +6,16 @@
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEE}; //Assign a mac address
 IPAddress ip(192, 168, 1, 200); //Assign my IP adress
 unsigned int localPort = 5000; //Assign a Port to talk over
-unsigned int request;
+unsigned long request;
 byte header;
-
+unsigned long time_old;
+boolean flag_received;
 unsigned int instruction;
 String datReq; //String for our data
 Comms comms(ip, mac, localPort);      //  Ethernet module object
 Location location(1);                 // GPS module object
 Actuator actuator(5,6);                     // configure SMC  reset and  error pins
-
+String data = "";
 char LIS3DH_CS[4] = {20, 21, 22, 23};		//IMU
 Feedback feedback(LIS3DH_CS, 0, 1, 32);
 
@@ -22,12 +23,8 @@ Feedback feedback(LIS3DH_CS, 0, 1, 32);
 typedef enum{
 	IDLE,     // Awaits for communication  and gets the id
 	ACT_DRIVE_ALL_SP,		//? Drive System Controllers
-	ACT_ARM_SH_YAW,			//? ARM Controllers
-	ACT_ARM_SH_PITCH,
-	ACT_ARM_EL_PITCH,
-	ACT_WRIST_PITCH,		//? Wrist Controllers
-	ACT_WRIST_ROLL,
-	ACT_GRIPPER_ROLL,		//? Gripper Controller
+	ACT_ARM_ALL_SP,			//? ARM Controllers (Arm yaw, Shoulder pitch, Elbow pitch)
+	ACT_GRIPPER_ALL_SP,		//? Wrist Controllers
 	ACT_COOLING_SET,		//? Cooling System
 	FEE_UPD_SUSPS,			//? IMU
 	FEE_GET_SUSP1,
@@ -67,14 +64,19 @@ void setup() {
 
 	//Set next state
 	cState = IDLE;
+	time_old = millis();
 }
 
 void loop() {
+	
 	switch(cState){
 		case IDLE:
+			//Reset ethernet every now and then
+			flag_received = false;
 			if(comms.available()){   // If data is at socket
 				//? Thought this was easier to understand 
 				//? Reads, parses header and stores request
+				flag_received = true;
 				request = comms.read();
 				header = request & 0xFF;
 				request = request >> 8;
@@ -83,22 +85,10 @@ void loop() {
 						cState = ACT_DRIVE_ALL_SP;		//? SET left and right speed 
 						break;
 					case 0x07:
-						cState = ACT_ARM_SH_YAW; 		//? Arm controllers
+						cState = ACT_ARM_ALL_SP; 		//? Arm controllers
 						break;
 					case 0x08:
-						cState = ACT_ARM_SH_PITCH; 		
-						break;
-					case 0x09:
-						cState = ACT_ARM_EL_PITCH; 		
-						break;
-					case 0x0A:
-						cState = ACT_WRIST_PITCH; 		
-						break;
-					case 0x0B:
-						cState = ACT_WRIST_ROLL; 		
-						break;
-					case 0x0C:
-						cState = ACT_GRIPPER_ROLL; 		
+						cState = ACT_GRIPPER_ALL_SP; 	//? Gripper Controllers
 						break;
 					case 0x0D:
 						cState = ACT_COOLING_SET;	//? Cooling System
@@ -131,9 +121,16 @@ void loop() {
 						cState = LOC_GET_LON;
 						break;
 				}
+				time_old = millis();
 			}else{
-				//cState = LOC_UPDATE;
+				cState = LOC_UPDATE;
 			}
+			//Serial.println((millis() - time_old));
+			//Serial.println((millis() - time_old));
+				if(!flag_received & ((millis() - time_old) > 10000)){
+					Serial.println("HOLOO");
+					comms.start();
+				}
 			break;
 
 		case ACT_DRIVE_ALL_SP:
@@ -155,44 +152,83 @@ void loop() {
 			Serial.print("right: ");
 			Serial.print(rightSide);
 			Serial.println();
-
+			data = String(actuator.driveGetTemp(2)) + String(actuator.driveGetVoltage(2));
+			//Serial.println(actuator.driveGetTemp(2));
+			comms.write(data);
 			actuator.driveSetAllSpeed(leftSide, rightSide);
 			cState = IDLE;
 			break;
 		
-		case ACT_ARM_SH_YAW:
-			Serial.println("Shoulder YAW");
-			actuator.shoulderYaw(request);
+		case ACT_ARM_ALL_SP:
+			int shoulderYaw_speed, shoulderPitch_speed, elbowPitch_speed;
+			Serial.println(request,HEX);
+			// Get individual speeds
+			shoulderYaw_speed = request & 0xFF;
+			shoulderPitch_speed = (request >> 8) & 0xFF;
+			elbowPitch_speed = (request >> 16);
+			// Parse direction
+			if (shoulderYaw_speed >> 7){
+				shoulderYaw_speed = shoulderYaw_speed & 0x7F;
+				shoulderYaw_speed = -shoulderYaw_speed;
+			}
+			if (shoulderPitch_speed >> 7){
+				shoulderPitch_speed = shoulderPitch_speed & 0x7F;
+				shoulderPitch_speed = -shoulderPitch_speed;
+			}
+			if (elbowPitch_speed >> 7){
+				elbowPitch_speed = elbowPitch_speed & 0x7F;
+				elbowPitch_speed = -elbowPitch_speed;
+			}
+			Serial.print("ARM MOVING: ");
+			Serial.print("SH Yaw: ");
+			Serial.print(shoulderYaw_speed);
+			Serial.print(" SH Pitch: ");
+			Serial.print(shoulderPitch_speed);
+			Serial.print(" EL Pitch: ");
+			Serial.println(elbowPitch_speed);
+			// Set actuator speed
+			actuator.shoulderYaw(shoulderYaw_speed);
+			actuator.shoulderPitch(shoulderPitch_speed);
+			actuator.elbowPitch(elbowPitch_speed);
+
 			cState = IDLE;
 			break;
 		
-		case ACT_ARM_SH_PITCH:
-			Serial.println("Shoulder PITCH");
-			actuator.shoulderPitch(request);
-			cState = IDLE;
-			break;
-
-		case ACT_ARM_EL_PITCH:
-			Serial.println("Elbow PITCH");
-			actuator.elbowPitch(request);
-			cState = IDLE;
-			break;
-
-		case ACT_WRIST_PITCH:
-			Serial.println("Wrist PITCH");
-			actuator.wristPitch(request);
-			cState = IDLE;
-			break;
-
-		case ACT_WRIST_ROLL:
-			Serial.println("Wrist ROLL");
-			actuator.wristRoll(request);
-			cState = IDLE;
-			break;
-
-		case ACT_GRIPPER_ROLL:
-			Serial.println("Gripper ROLL");
-			actuator.gripperRoll(request);
+		case ACT_GRIPPER_ALL_SP:
+			int wristYaw_speed, wristRoll_speed, gripperRoll_speed;
+			Serial.println(request,HEX);
+			// Get individual speeds
+			wristYaw_speed = request & 0xFF;
+			wristRoll_speed = (request >> 8) & 0xFF;
+			gripperRoll_speed = (request >> 16);
+			// Parse direction
+			if (wristYaw_speed >> 7){
+				wristYaw_speed = wristYaw_speed & 0x7F;
+				wristYaw_speed = -wristYaw_speed;
+			}
+			if (wristRoll_speed >> 7){
+				wristRoll_speed = wristRoll_speed & 0x7F;
+				wristRoll_speed = -wristRoll_speed;
+			}
+			if (gripperRoll_speed >> 7){
+				gripperRoll_speed = gripperRoll_speed & 0x7F;
+				gripperRoll_speed = -gripperRoll_speed;
+			}
+			Serial.print("ARM MOVING: ");
+			Serial.print("Wrist Yaw: ");
+			Serial.print(wristYaw_speed);
+			Serial.print(" Wrist Roll: ");
+			Serial.print(wristRoll_speed);
+			Serial.print(" Gripper Roll: ");
+			Serial.println(gripperRoll_speed);
+			// Set actuator speed
+			if(wristYaw_speed == 1){
+				actuator.wristPitch(true);
+			}else if (wristYaw_speed == 2){
+				actuator.wristPitch(false);
+			}
+			actuator.wristRoll(wristRoll_speed);
+			actuator.gripperRoll(gripperRoll_speed);
 			cState = IDLE;
 			break;
 

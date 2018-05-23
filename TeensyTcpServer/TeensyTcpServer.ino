@@ -77,6 +77,12 @@ void setup() {
 	feedback.encodersInit(&encL1, &encL2, &encL3, &encR1, &encR2, &encR3);
 	//Set next state
 	cState = IDLE;
+	if(location.getFix()){
+		float baseLongitud;
+		float baseLatitud;
+		baseLongitud=
+		baseLatitud=
+	}
 }
 
 void loop() {

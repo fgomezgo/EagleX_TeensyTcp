@@ -19,6 +19,7 @@ class Location{
         float getLatitude();
         float getHeading();
         float getAltitude();
+        float getDistanceRoverFromBase();
         bool getFix();
         //void setFrequency(char freq);
     private:

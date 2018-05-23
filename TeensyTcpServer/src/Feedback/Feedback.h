@@ -36,7 +36,7 @@ class Feedback{
         float encodersReadLeft();
         float encodersReadRight();
         void  encodersReadAll();
-
+        float encodersDist();
     private:
         Adafruit_LIS3DH _lis[4];
         float _suspensionsAngle[7];

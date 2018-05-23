@@ -343,6 +343,15 @@ class RoverComms():
         self.pub_rmotor.publish(self.right)
             
         self.ticks_since_target += 1
+
+
+
+        if(Location.getFix() and bandera_gps_base == 0):
+		    baseLongitud=self.navsat.longitude
+		    baseLatitud=self.navsat.latitude
+            bandera_gps_base=1
+        distancebasetorover = Location.getDistanceRoverFromBase(baseLongitud,baseLatitud,self.navsat.longitude,self.navsat.latitude)
+
         """
     #############################################################
     def joyCallBack(self, data):
@@ -380,6 +389,7 @@ if __name__ == '__main__':
     """ main """
     try:
         roverComms = RoverComms()
+        bandera_gps_base = 0
         roverComms.setup()
     except rospy.ROSInterruptException:
 			pass

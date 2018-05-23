@@ -3,6 +3,7 @@
 */
 #include "Arduino.h"
 #include "Location.h"
+#include "math.h"
 
 // what's the name of the hardware serial port?
 #define GPSSerial Serial5
@@ -98,3 +99,12 @@ float Location::getAltitude(){
   updateData();
   return GPS.altitude;
 }
+//*******//*******//*******//*******//*******//*******//*******//*******//*******//*******//*******//*******//*******//*******//*******/
+float Location::getDistanceRoverFromBase( float lon1, float lat1, float lon2, float lat2){
+  float dlon = lon2 - lon1;
+  float dlat = lat2 - lat1;
+  float a = (sin(dlat/2))^2 + cos(lat1) * cos(lat2) * (sin(dlon/2))^2;
+  float c = 2 * atan2( sqrt(a), sqrt(1-a) );
+  float d = R * c;
+}return d;
+//*******//*******//*******//*******//*******//*******//*******//*******//*******//*******//*******//*******//*******//*******//*******/

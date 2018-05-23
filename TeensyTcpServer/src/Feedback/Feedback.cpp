@@ -141,7 +141,7 @@ float Feedback::encodersReadLeft(){
     rads[1] = 0;
     rads[2] = 0;
     if (newPosition[0] != oldPosition[0]) {
-        rads[0] = abs(oldPosition[0]-newPosition[0])*(pi/667.8624);
+        rads[0] = abs(oldPosition[0]-newPosition[0])*(pi/477.84);
         rads[0] = rads[0]*r;
         if(rads[0] > 0.63){
             rads[0] = 0.63;
@@ -152,7 +152,7 @@ float Feedback::encodersReadLeft(){
     }
 
     if (newPosition[1] != oldPosition[1]) {
-        rads[1] = abs(oldPosition[1]-newPosition[1])*(pi/667.8624);
+        rads[1] = abs(oldPosition[1]-newPosition[1])*(pi/477.84);
         rads[1] = rads[1]*r;
         if(rads[1] > 0.63){
             rads[1] = 0.63;
@@ -163,7 +163,7 @@ float Feedback::encodersReadLeft(){
     }
 
     if (newPosition[2] != oldPosition[2]) {
-        rads[2] = abs(oldPosition[2]-newPosition[2])*(pi/333.9312);
+        rads[2] = abs(oldPosition[2]-newPosition[2])*(pi/477.84);
         rads[2] = rads[2]*r;
         if(rads[2] > 0.63){
             rads[2] = 0.63;
@@ -183,7 +183,7 @@ float Feedback::encodersReadRight(){
     newPosition[5] = _encR3[0].read();
 
     if (newPosition[3] != oldPosition[3]) {
-        rads[3] = abs(oldPosition[3]-newPosition[3])*(pi/667.8624);
+        rads[3] = abs(oldPosition[3]-newPosition[3])*(pi/477.84);
         rads[3] = rads[3]*r;
         if(rads[3] > 0.63){
             rads[3] = 0.63;
@@ -194,7 +194,7 @@ float Feedback::encodersReadRight(){
     }
 
     if (newPosition[4] != oldPosition[4]) {
-        rads[4] = abs(oldPosition[4]-newPosition[4])*(pi/667.8624);
+        rads[4] = abs(oldPosition[4]-newPosition[4])*(pi/477.84);
         rads[4] = rads[4]*r;
         if(rads[4] > 0.63){
             rads[4] = 0.63;
@@ -205,7 +205,7 @@ float Feedback::encodersReadRight(){
     }
 
     if (newPosition[5] != oldPosition[5]) {
-        rads[5] = abs(oldPosition[5]-newPosition[5])*(pi/667.8624);
+        rads[5] = abs(oldPosition[5]-newPosition[5])*(pi/477.84);
         rads[5] = rads[5]*r;
         if(rads[5] > 0.63){
             rads[5] = 0.63;
@@ -219,3 +219,19 @@ float Feedback::encodersReadRight(){
  
 }
 
+float Feedback::encodersDist(){
+    float distancia = 0;
+    float encoders_promedio = 0;
+    float encoders_promedio_revolution = 0;
+    float radio = .1;
+    float perimetro = radio*2*pi;
+    newPosition[0] = _encL1[0].read();
+    newPosition[1] = _encL2[0].read();
+    newPosition[2] = _encL3[0].read();
+    newPosition[3] = _encR1[0].read();
+    newPosition[4] = _encR2[0].read();
+    newPosition[5] = _encR3[0].read();
+    encoders_promedio = (newPosition[0]+newPosition[1]+newPosition[2]+newPosition[3]+newPosition[4]+newPosition[5])/6;
+    encoders_promedio_revolution = encoders_promedio/4,776.384;
+    distancia=encoders_promedio_revolution*perimetro;
+}

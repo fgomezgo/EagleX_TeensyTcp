@@ -8,7 +8,8 @@ IPAddress ip(192, 168, 1, 200); //Assign my IP adress
 unsigned int localPort = 5000; //Assign a Port to talk over
 unsigned int request;
 byte header;
-
+unsigned long time_old;
+boolean flag_received;
 unsigned int instruction;
 String datReq; //String for our data
 Comms comms(ip, mac, localPort);      //  Ethernet module object
@@ -83,14 +84,18 @@ void setup() {
 	feedback.encodersInit(&encL1, &encL2, &encL3, &encR1, &encR2, &encR3);
 	//Set next state
 	cState = IDLE;
+	time_old = millis();
 }
 
 void loop() {
 	switch(cState){
 		case IDLE:
+			//Reset ethernet every now and then
+			flag_received = false;
 			if(comms.available()){   // If data is at socket
 				//? Thought this was easier to understand 
 				//? Reads, parses header and stores request
+				flag_received = true;
 				request = comms.read();
 				header = request & 0xFF;
 				request = request >> 8;
@@ -154,9 +159,14 @@ void loop() {
 						break;
 
 				}
+				time_old = millis();
 			}else{
 				cState = LOC_UPDATE;
 				
+			}
+			if(!flag_received & ((millis() - time_old) > 10000)){
+				Serial.println("---- Connectiion reset ----");
+				comms.start();
 			}
 			break;
 

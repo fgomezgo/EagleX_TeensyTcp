@@ -37,6 +37,12 @@ class RoverComms():
         self.rate = rospy.get_param("~rate", 5)
         """ Motor Controllers"""
         rospy.Subscriber('joy', Joy, self.joyCallBack)
+
+
+        #Joy 2 for science#
+        rospy.Subscriber('joy2', Joy, self.joyCallBack2)
+
+
         """ IMU """
         self.imu = rospy.Publisher('joint_states', JointState, queue_size=10)
         self.joints = JointState()
@@ -130,6 +136,25 @@ class RoverComms():
         self.chassisR = 0
         self.chassisP = 0
         self.chassisY = 0
+
+        #-------------------JOY2---------------------------------#
+        #*** -----------------------muestreo---------------------------- ***#
+        self.joy2_6 = 0
+        self.joy2_7 = 0
+        self.joy2_8 = 0
+        self.joy2_9 = 0
+
+        self.joy2_6_old = 0
+        self.joy2_7_old = 0
+        self.joy2_8_old = 0
+        self.joy2_9_old = 0
+
+        self.joy2_6_change = 0
+        self.joy2_7_change = 0
+        self.joy2_8_change = 0
+        self.joy2_9_change = 0
+        #*** --------------------------------------------------- ***#
+
         """ Location variables """
         self.navsat = NavSatFix()
         self.time_sec = 0
@@ -210,6 +235,26 @@ class RoverComms():
                 pass
             self.joyL_change = 0
             self.joyR_change = 0
+        ##################### Sciencie Muestreo ###################
+        """    Apartado 0 """
+        if self.joy2_6_old != self.joy2_6:
+            self.joy2_6_change = 1
+            self.joy2_6_old = self.joy2_6
+
+        """    Apartado 1 """
+        if self.joy2_7_old != self.joy2_7:
+            self.joy2_7_change = 1
+            self.joy2_7_old = self.joy2_7
+
+        """    Apartado 2 """
+        if self.joy2_8_old != self.joy2_8:
+            self.joy2_8_change = 1
+            self.joy2_8_old = self.joy2_8
+
+        """    Apartado 3 """
+        if self.joy2_9_old != self.joy2_9:
+            self.joy2_9_change = 1
+            self.joy2_9_old = self.joy2_9
 
         ##################### ARM Controllers #####################
         """ Shoulder YAW """
@@ -531,8 +576,13 @@ class RoverComms():
         # Cooling System (Relays)
         self.SH = data.buttons[8]
         self.OP = data.buttons[9]
-
-        
+    def joyCallBack2(self,data):
+        #Joy 2 for science#
+        #Muestreo#
+        self.joy2_6 = data.buttons[6]
+        self.joy2_7 = data.buttons[7]
+        self.joy2_8 = data.buttons[8]
+        self.joy2_9 = data.buttons[9]
     
 #############################################################
 #############################################################

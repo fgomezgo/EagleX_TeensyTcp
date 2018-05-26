@@ -56,13 +56,21 @@ class Actuator{
     //TODO: Plan is to send byte with fans states encoded?
     void coolingSet(char config);
 
+
+    /* -------------- Muestre 0 -------------- */
+    void muestreo0( );
+        /* -------------- Muestre 1 -------------- */
+    void muestreo1( );
+        /* -------------- Muestre 2 -------------- */
+    void muestreo2( );
+        /* -------------- Muestre 3 -------------- */
+    void muestreo3( );
   private:
     //TODO: Method for setting controller power [%]
     char _resetPin;
     char _errPin;
     Servo _wristPitch;
     int _servoState = 60;    
-
 };
 
 #endif

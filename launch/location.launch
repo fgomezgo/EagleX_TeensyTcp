@@ -29,5 +29,9 @@
   <node pkg = "joy" type = "joy_node" name = "joy">
     <param name="dev" type="string" value="/dev/input/js1" />
   </node>
+  <!-- joy for sciencie 2-->
+  <node pkg = "joy" type = "joy_node" name = "joy2">
+    <param name="dev" type="string" value="/dev/input/js3" />
+  </node>
 
 </launch>

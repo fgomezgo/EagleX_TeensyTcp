@@ -184,3 +184,25 @@ void Actuator::coolingSet(char config){
 	digitalWrite(16, config & 0x01);
 	digitalWrite(17, config >> 1);
 }
+/** * ! defnir pin falta *************************************************/
+/* -------------- Muestreo 0 -------------- */
+
+void Actuator::muestreo0(){
+	_wristPitch.writre(0);
+}
+
+/* -------------- Muestreo 1 -------------- */
+
+void Actuator::muestreo0(){
+	_wristPitch.writre(65);
+}
+/* -------------- Muestreo 2 -------------- */
+
+void Actuator::muestreo0(){
+	_wristPitch.writre(125);
+}
+/* -------------- Muestreo 3 -------------- */
+
+void Actuator::muestreo0( ){
+	_wristPitch.writre(180);
+}

@@ -1,0 +1,11 @@
+<launch>
+    <!-- PS4 Controller -->
+    <node pkg = "joy" type = "joy_node" name = "joy" ns= "joy_PS4">
+        <param name="dev" type="string" value="/dev/input/js1" />
+    </node>
+
+    <!-- Mad Catz Controller -->
+    <node pkg = "joy" type = "joy_node" name = "joy" ns= "joy_MCJ">
+        <param name="dev" type="string" value="/dev/input/js2" />
+    </node>
+</launch>   

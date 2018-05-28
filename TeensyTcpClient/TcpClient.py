@@ -35,8 +35,11 @@ class RoverComms():
         self.socket = socket(AF_INET, SOCK_DGRAM)
         self.socket.settimeout(1)
         self.rate = rospy.get_param("~rate", 5)
-        """ Motor Controllers"""
-        rospy.Subscriber('joy', Joy, self.joyCallBack)
+        """ PS4 Controlllers"""
+        rospy.Subscriber('joy_PS4/joy', Joy, self.joyPS4Callback)
+        """ Mad Cat Controlllers"""
+        rospy.Subscriber('joy_MCJ/joy', Joy, self.joyMCJCallBack)
+
         """ IMU """
         self.imu = rospy.Publisher('joint_states', JointState, queue_size=10)
         self.joints = JointState()
@@ -116,6 +119,25 @@ class RoverComms():
         self.GRIPPER_ROLL_speed = 0
 
         
+        # Joystick
+
+        self.mdj_6 = 0
+        self.mdj_7 = 0
+        self.mdj_8 = 0
+        self.mdj_9 = 0
+
+        self.mdj_6_change = 0
+        self.mdj_7_change = 0
+        self.mdj_8_change = 0
+        self.mdj_9_change = 0
+
+        self.mdj_6_old = 0
+        self.mdj_7_old = 0
+        self.mdj_8_old = 0
+        self.mdj_9_old = 0
+
+        self.science_Revolver = 0
+
         """ Cooling System """
         self.SH = 0
         self.OP = 0
@@ -310,6 +332,47 @@ class RoverComms():
             else:
                 self.PUaD_change = 0
 
+        """ Science Revolver Servo """
+        # Button 6
+        if  self.mdj_6_old != self.mdj_6:
+            self.mdj_6_change = 1
+            self.mdj_6_old = self.mdj_6
+
+        # Button 7
+        if  self.mdj_7_old != self.mdj_7:
+            self.mdj_7_change = 1
+            self.mdj_7_old = self.mdj_7
+
+        # Button 8
+        if  self.mdj_8_old != self.mdj_8:
+            self.mdj_8_change = 1
+            self.mdj_8_old = self.mdj_8
+        
+        # Button 9
+        if  self.mdj_9_old != self.mdj_9:
+            self.mdj_9_change = 1
+            self.mdj_9_old = self.mdj_9
+
+        if self.mdj_6_old == 1:
+            if self.mdj_6 == 1:
+                self.science_Revolver = 0x04
+                rospy.loginfo("INFO: Sample collector POS 0")
+
+        if self.mdj_7_old == 1:
+            if self.mdj_7 == 1:
+                self.science_Revolver = 0x08
+                rospy.loginfo("INFO: Sample collector POS 1")
+
+        if self.mdj_8_old == 1:
+            if self.mdj_8 == 1:
+                self.science_Revolver = 0x10
+                rospy.loginfo("INFO: Sample collector POS 2")
+
+        if self.mdj_9_old == 1:
+            if self.mdj_9 == 1:
+                self.science_Revolver = 0x20
+                rospy.loginfo("INFO: Sample collector POS 3")
+
         """ Wrist ROLL (Drill) """
         if  self.SQ_old != self.SQ:
             self.SQ_change = 1
@@ -357,10 +420,13 @@ class RoverComms():
             else:
                 self.GRIPPER_ROLL_speed = 0 
             
-        if (self.PUaD_change == 1) or (self.SQ_change == 1) or (self.CI_change == 1) or (self.TR_change == 1) or (self.CR_change == 1):
+        if (self.PUaD_change == 1) or (self.SQ_change == 1) or (self.CI_change == 1) or (self.TR_change == 1) or (self.CR_change == 1) or (self.mdj_6_change == 1) or (self.mdj_7_change == 1) or (self.mdj_8_change == 1) or  (self.mdj_9_change == 1):
             # Print speed
-            rospy.loginfo("INFO: Wrist yaw: %s Wrist roll: %s Gripper Roll: %s", self.PUaD_speed, self.WRIST_ROLL_speed, self.GRIPPER_ROLL_speed)
+            #rospy.loginfo("INFO: Wrist yaw: %s Wrist roll: %s Gripper Roll: %s", self.PUaD_speed, self.WRIST_ROLL_speed, self.GRIPPER_ROLL_speed)
+            
             # Concatenate values
+            self.PUaD_speed = self.PUaD_speed | self.science_Revolver
+            rospy.loginfo("Holo: %s", self.PUaD_speed)
             data = bytearray([self.GRIPPER_ROLL_speed, self.WRIST_ROLL_speed, self.PUaD_speed, 0x08])
             self.socket.sendto(data, self.address) #send command to arduino
             # Reset changes
@@ -369,6 +435,11 @@ class RoverComms():
             self.CI_change = 0
             self.TR_change = 0
             self.CR_change = 0
+            
+            self.mdj_6_change = 0
+            self.mdj_7_change = 0
+            self.mdj_8_change = 0
+            self.mdj_9_change = 0
             
 
         ##################### Cooling System #####################
@@ -456,6 +527,7 @@ class RoverComms():
         self.time_nsec = rospy.Time.now().secs
         """
         ##################### Location #####################
+        """
         if (rospy.Time.now().secs - self.time_sec) >= 2:
             rospy.loginfo("INFO: Location: Query")
 
@@ -492,6 +564,7 @@ class RoverComms():
         
         # Publish 
         self.current_status.publish(self.generic_diagnostic_array)
+        """
         """        # dx = (l + r) / 2
         # dr = (r - l) / w
             
@@ -505,7 +578,7 @@ class RoverComms():
         self.ticks_since_target += 1
         """
     #############################################################
-    def joyCallBack(self, data):
+    def joyPS4Callback(self, data):
     #############################################################
         
         # Left drive system Controllers [0 - 2]
@@ -532,8 +605,13 @@ class RoverComms():
         self.SH = data.buttons[8]
         self.OP = data.buttons[9]
 
-        
-    
+    #############################################################
+    def joyMCJCallBack(self, data):
+    #############################################################
+        self.mdj_6 = data.buttons[5]
+        self.mdj_7 = data.buttons[6]
+        self.mdj_8 = data.buttons[7]
+        self.mdj_9 = data.buttons[8]
 #############################################################
 #############################################################
 if __name__ == '__main__':

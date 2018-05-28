@@ -36,6 +36,10 @@ void Actuator::controllerConfigureReset(){
 	controllerExitSafeStart();
 	_wristPitch.attach(14);
 	_wristPitch.write(92);
+
+	// Set position of exctractor to 0
+	_revolverSampler.attach(3);
+	_revolverSampler.write(15);
 }
 // Used to read incoming information from the SMC
 int Actuator::controllerReadByte(){
@@ -169,6 +173,23 @@ void Actuator::wristRoll(int speed_Wrs_Roll){
 	//delay(200);
 }
 
+void Actuator::setCache(char sample){
+	switch(sample){
+		case 1:
+			_revolverSampler.write(0);
+			break;
+		case 2:
+			_revolverSampler.write(65);
+			break;
+		case 4:
+			_revolverSampler.write(125);
+			break;
+		case 8:
+			_revolverSampler.write(180);
+			break;
+	}
+	
+}
 
 /* -------------- Gripper Controller -------------- */
 void Actuator::gripperRoll(int speed_Gri_Roll){

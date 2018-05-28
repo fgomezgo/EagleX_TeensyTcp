@@ -51,6 +51,9 @@ class Actuator{
     /* -------------- Gripper Controller -------------- */
     void gripperRoll(int speed_Gri_Roll);
 
+    /* -------------- Science Revolving Sampler Servo -------------- */
+    void setCache(char sample);
+
 
     /* -------------- Cooling System -------------- */
     //TODO: Plan is to send byte with fans states encoded?
@@ -60,7 +63,9 @@ class Actuator{
     //TODO: Method for setting controller power [%]
     char _resetPin;
     char _errPin;
+    Servo _revolverSampler;
     Servo _wristPitch;
+    
     int _servoState = 60;    
 
 };

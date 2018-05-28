@@ -6,6 +6,11 @@
 
 #include "Arduino.h"
 #include <Servo.h>
+#include <SoftwareSerial.h>
+
+// Define Serial IDs
+#define rxPin 3
+#define txPin 4
 
 class Actuator{
   public:
@@ -61,6 +66,7 @@ class Actuator{
     char _resetPin;
     char _errPin;
     Servo _wristPitch;
+    SoftwareSerial _mySerial = SoftwareSerial(rxPin, txPin);
     int _servoState = 60;    
 
 };

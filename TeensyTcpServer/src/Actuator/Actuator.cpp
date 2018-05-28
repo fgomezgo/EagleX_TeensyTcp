@@ -4,11 +4,12 @@
 #include "Arduino.h"
 #include "Actuator.h"
 
-#define SMCSerial Serial3
+#define SMCSerial _mySerial
 // some variable IDs
 #define ERROR_STATUS 0		// No used, but left for future modifications
 #define INPUT_VOLTAGE 23	// ID for quering the input voltage of a SMC
 #define TEMPERATURE 24		// ID for quering the temperature of a SMC
+
 
 // Constructor, sets the reset and error pins
 Actuator::Actuator(char reset, char error){
@@ -19,8 +20,12 @@ Actuator::Actuator(char reset, char error){
 //* Utility methods/Functions -----------------
 
 void Actuator::controllerConfigureReset(){
+	// define pin modes for tx, rx, led pins:
+	pinMode(rxPin, INPUT);
+	pinMode(txPin, OUTPUT);
+	// Init Software serial
 	// Starts serial comms with the SMC
-	Serial3.begin(9600);
+	_mySerial.begin(9600);
 	// briefly reset SMC when Arduino starts up (optional)
 	pinMode(_resetPin, OUTPUT);
 	digitalWrite(_resetPin, LOW); // reset SMC
@@ -31,7 +36,7 @@ void Actuator::controllerConfigureReset(){
 	// this lets us read the state of the SMC ERR pin (optional)
 	pinMode(_errPin, INPUT);
 	// Requires to identify baudrate
-	Serial3.write(0xAA); // send baud-indicator byte
+	_mySerial.write(0xAA); // send baud-indicator byte
 	// clear the safe-start violation and let the motor run
 	controllerExitSafeStart();
 	_wristPitch.attach(14);
@@ -40,15 +45,15 @@ void Actuator::controllerConfigureReset(){
 // Used to read incoming information from the SMC
 int Actuator::controllerReadByte(){
 	char c;
-	if(Serial3.readBytes(&c, 1) == 0){ return -1; }
+	if(_mySerial.readBytes(&c, 1) == 0){ return -1; }
 	return (byte)c;
 }
 // Used to get different variables from a specific motor
 unsigned int Actuator::controllerGetVariable(unsigned char variableID, unsigned char device){
-	Serial3.write(0xAA);
-	Serial3.write(device);
-	Serial3.write(0x21);
-	Serial3.write(variableID);
+	_mySerial.write(0xAA);
+	_mySerial.write(device);
+	_mySerial.write(0x21);
+	_mySerial.write(variableID);
 	return controllerReadByte() + 256 * controllerReadByte();
 }
 
@@ -99,7 +104,7 @@ bool Actuator::driveGetError(){
 
 // Starts SMCs
 void Actuator::controllerExitSafeStart(){
-	Serial3.write(0x83);
+	_mySerial.write(0x83);
 }
 
 
@@ -116,17 +121,17 @@ unsigned int Actuator::driveGetTemp(unsigned char device){
 
 // Sets SMC individual speed
 void Actuator::driveSetSpeed(int percentage, unsigned char device){
-	Serial3.write(0xAA);
-	Serial3.write(device);
+	_mySerial.write(0xAA);
+	_mySerial.write(device);
 	if (percentage < 0){
-		Serial3.write(0x06); // motor reverse command
+		_mySerial.write(0x06); // motor reverse command
 		percentage = -percentage; // make speed positive
 	}
 	else{
-		Serial3.write(0x05); // motor forward command
+		_mySerial.write(0x05); // motor forward command
 	}
-	Serial3.write(0x00);
-	Serial3.write(percentage);
+	_mySerial.write((byte)0x00);
+	_mySerial.write(percentage);
 }
 
 /* -------------- Arm motor controllers -------------- */

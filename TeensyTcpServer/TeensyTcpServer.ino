@@ -35,12 +35,7 @@ Encoder encR3(35, 36);
 typedef enum{
 	IDLE,     // Awaits for communication  and gets the id
 	ACT_DRIVE_ALL_SP,		//? Drive System Controllers
-	ACT_ARM_SH_YAW,			//? ARM Controllers
-	ACT_ARM_SH_PITCH,
-	ACT_ARM_EL_PITCH,
-	ACT_WRIST_PITCH,		//? Wrist Controllers
-	ACT_WRIST_ROLL,
-	ACT_GRIPPER_ROLL,		//? Gripper Controller
+	ACT_SET_PANTILT_ANGLES,			//? ARM Controllers
 	ACT_COOLING_SET,		//? Cooling System
 	FEE_UPD_SUSPS,			//? IMU
 	FEE_GET_SUSP1,
@@ -104,22 +99,7 @@ void loop() {
 						cState = FEE_GET_AVG_SPEED;		//? SET left and right speed 
 						break;
 					case 0x07:
-						cState = ACT_ARM_SH_YAW; 		//? Arm controllers
-						break;
-					case 0x08:
-						cState = ACT_ARM_SH_PITCH; 		
-						break;
-					case 0x09:
-						cState = ACT_ARM_EL_PITCH; 		
-						break;
-					case 0x0A:
-						cState = ACT_WRIST_PITCH; 		
-						break;
-					case 0x0B:
-						cState = ACT_WRIST_ROLL; 		
-						break;
-					case 0x0C:
-						cState = ACT_GRIPPER_ROLL; 		
+						cState = ACT_SET_PANTILT_ANGLES; 		//? Set angle
 						break;
 					case 0x0D:
 						cState = ACT_COOLING_SET;	//? Cooling System
@@ -194,41 +174,35 @@ void loop() {
 			cState = IDLE;;
 			break;
 		
-		case ACT_ARM_SH_YAW:
-			Serial.println("Shoulder YAW");
-			actuator.shoulderYaw(request);
+		case ACT_SET_PANTILT_ANGLES:
+			int pan, tilt;
+			int arreglo[2];
+			pan =  request & 0xFF;
+			tilt = request >> 8;
+			if (pan >> 7){
+				pan = pan & 0x7F;
+				pan = -pan;
+			}
+			if (tilt >> 7){
+				tilt = tilt & 0x7F;
+				tilt = -tilt;
+			}
+			arreglo[0] = pan;
+			arreglo[1] = tilt;
+
+			Serial.println("Set angles");
+			
+			Serial.print("pan: ");
+			Serial.print(pan);
+			Serial.print(" ");
+			Serial.print("tilt: ");
+			Serial.print(tilt);
+			Serial.println();
+
+			actuator.setServos(arreglo);
 			cState = IDLE;
 			break;
 		
-		case ACT_ARM_SH_PITCH:
-			Serial.println("Shoulder PITCH");
-			actuator.shoulderPitch(request);
-			cState = IDLE;
-			break;
-
-		case ACT_ARM_EL_PITCH:
-			Serial.println("Elbow PITCH");
-			actuator.elbowPitch(request);
-			cState = IDLE;
-			break;
-
-		case ACT_WRIST_PITCH:
-			Serial.println("Wrist PITCH");
-			actuator.wristPitch(request);
-			cState = IDLE;
-			break;
-
-		case ACT_WRIST_ROLL:
-			Serial.println("Wrist ROLL");
-			actuator.wristRoll(request);
-			cState = IDLE;
-			break;
-
-		case ACT_GRIPPER_ROLL:
-			Serial.println("Gripper ROLL");
-			actuator.gripperRoll(request);
-			cState = IDLE;
-			break;
 
 		case ACT_COOLING_SET:
 			Serial.println("Cooling SET");

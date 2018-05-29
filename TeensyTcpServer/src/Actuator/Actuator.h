@@ -57,12 +57,23 @@ class Actuator{
     //TODO: Plan is to send byte with fans states encoded?
     void coolingSet(char config);
 
+    /* -------------- Set servos pant/tilt System -------------- */
+    void setServos(int pos[2]);
+
   private:
     //TODO: Method for setting controller power [%]
     char _resetPin;
     char _errPin;
     Servo _wristPitch;
+    Servo _servoUp;
+    Servo _servoSide;
     int _servoState = 60;
+
+    int _maxim = 180;
+    int _posUp = 0;
+    int _posSide = _maxim / 2;
+    boolean _turn = false;
+    
 
 };
 

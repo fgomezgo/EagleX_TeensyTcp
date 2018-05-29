@@ -6,6 +6,7 @@ from socket import *
 from datetime import datetime
 
 from std_msgs.msg import Float64
+from std_msgs.msg import Int8MultiArray
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Joy
 from sensor_msgs.msg import NavSatFix
@@ -57,6 +58,9 @@ class RoverComms():
         rospy.Subscriber("drive_system_left/control_effort", Float64, self.left_speed_cb)
         """ Right side controller subscriber """
         rospy.Subscriber("drive_system_right/control_effort", Float64, self.right_speed_cb)
+
+        """ Ball position subscriber """
+        rospy.Subscriber("/servo_move", Int8MultiArray, self.set_servos)
 
         
     #############################################################
@@ -119,6 +123,9 @@ class RoverComms():
         self.time_sec = 0
         self.loc_flag = 0
         self.loc_heading = 0
+
+        """ Servo pos """
+        self.pos = Int8MultiArray()
 
         ###### main loop  ######
         while not rospy.is_shutdown():
@@ -187,72 +194,13 @@ class RoverComms():
     
 
         ##################### ARM Controllers #####################
-        """ Shoulder YAW """
-        if self.PLaR == 1:
-            data = bytearray([0x00,0x00,0x00,0x07])
+        """ Set pan tilt angle """
+        try:
+            data = bytearray([0x00,self.pos.data[1],self.pos.data[0],0x07])
             self.socket.sendto(data, self.address) #send command to arduino
             rospy.loginfo("INFO: Shoulder moving: LEFT")
-
-        if self.PLaR == -1:
-            data = bytearray([0x00,0x00,0x01,0x07])
-            self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("INFO: Shoulder moving: RIGHT")
-
-        """ Shoulder PITCH """
-        if self.L1 == 1:
-            data = bytearray([0x00,0x00,0x00,0x08])
-            self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("INFO: Shoulder moving: UP")
-
-        if self.L2 == 1:
-            data = bytearray([0x00,0x00,0x01,0x08])
-            self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("INFO: Shoulder moving: DOWN")
-        
-        """ Elbow PITCH """
-        if self.R1 == 1:
-            data = bytearray([0x00,0x00,0x00,0x09])
-            self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("INFO: Elbow moving: UP")
-
-        if self.R2 == 1:
-            data = bytearray([0x00,0x00,0x01,0x09])
-            self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("INFO: Elbow moving: DOWN")
-
-        ##################### Gripper Controllers #####################
-        """ Wrist PITCH """
-        if self.PUaD == 1:
-            data = bytearray([0x00,0x00,0x00,0x0A])
-            self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("INFO: Wrist moving: UP")
-
-        if self.PUaD == -1:
-            data = bytearray([0x00,0x00,0x01,0x0A])
-            self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("INFO: Wrist moving: DOWN")
-
-        """ Wrist ROLL (Drill) """
-        if self.SQ == 1:
-            data = bytearray([0x00,0x00,0x00,0x0B])
-            self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("INFO: Wrist moving: ROLL LEFT")
-
-        if self.CI == 1:
-            data = bytearray([0x00,0x00,0x01,0x0B])
-            self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("INFO: Wrist moving: ROLL RIGHT")
-
-        """ Gripper ROLL """
-        if self.TR == 1:
-            data = bytearray([0x00,0x00,0x00,0x0C])
-            self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("INFO: Gripper moving: OPENING")
-
-        if self.CR == 1:
-            data = bytearray([0x00,0x00,0x01,0x0C])
-            self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("INFO: Gripper moving: CLOSING")
+        except:
+            pass
         ##################### Cooling System #####################
         if self.OP == 1:
             self.cool_left ^= 1
@@ -459,6 +407,12 @@ class RoverComms():
     #############################################################
         self.set_speed_right = data.data
         print "Right Control: " + str(self.set_speed_right)
+
+    #############################################################
+    def set_servos(self, data):
+    #############################################################
+        self.pos.data[0] == data.data[0]
+        self.pos.data[1] == data.data[1]
     
 #############################################################
 #############################################################

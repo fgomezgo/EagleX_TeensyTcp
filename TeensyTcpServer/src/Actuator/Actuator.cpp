@@ -36,6 +36,12 @@ void Actuator::controllerConfigureReset(){
 	controllerExitSafeStart();
 	_wristPitch.attach(14);
 	_wristPitch.write(_servoState);
+
+	_servoUp.attach(3);
+	_servoUp.write(0);
+
+	_servoSide.attach(4);
+	_servoSide.write(0);
 }
 // Used to read incoming information from the SMC
 int Actuator::controllerReadByte(){
@@ -202,4 +208,34 @@ void Actuator::coolingSet(char config){
 	pinMode(17, OUTPUT);
 	digitalWrite(16, config & 0x01);
 	digitalWrite(17, config >> 1);
+}
+
+/* -------------- Set servos pant/tilt System -------------- */
+
+void Actuator::setServos(int pos[2]){
+	if (pos[0] == 2) {
+      if (_posUp > 0)
+        _posUp--;
+      if (_posSide < _maxim && _turn == false) {
+        _posSide++;
+        if (_posSide == _maxim)
+          _turn = true;
+      }
+      else if (_posSide > 0) {
+        _posSide--;
+        if (_posSide == 0)
+          _turn = false;
+      }
+      return;
+  }
+  
+  if (_posUp < _maxim && pos[1] == 1)
+    _posUp++;
+  else if (_posUp > 0 && pos[1] == -1)
+    _posUp--;
+    
+  if (_posSide < _maxim && pos[0] == 1)
+    _posSide++;
+  else if (_posSide > 0  && pos[0] == -1)
+    _posSide--;  
 }

@@ -2,7 +2,8 @@
 #include "src/Location/Location.h"
 #include "src/Actuator/Actuator.h"
 #include "src/Feedback/Feedback.h"
-
+#define DHTPIN 2
+#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321 	
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEE}; //Assign a mac address
 IPAddress ip(192, 168, 1, 200); //Assign my IP adress
 unsigned int localPort = 5000; //Assign a Port to talk over
@@ -17,7 +18,7 @@ Location location(1);                 // GPS module object
 Actuator actuator(5,6);                     // configure SMC  reset and  error pins
 String data = "";
 char LIS3DH_CS[4] = {20, 21, 22, 23};		//IMU
-Feedback feedback(LIS3DH_CS, 0, 1, 32);
+Feedback feedback(LIS3DH_CS, 0, 1, 32,DHTPIN, DHTTYPE);
 
 // States
 typedef enum{

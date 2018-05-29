@@ -123,7 +123,7 @@ void loop() {
 				}
 				time_old = millis();
 			}else{
-				cState = LOC_UPDATE;
+				//cState = LOC_UPDATE;
 			}
 			//Serial.println((millis() - time_old));
 			//Serial.println((millis() - time_old));

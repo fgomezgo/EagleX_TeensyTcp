@@ -157,12 +157,12 @@ void Actuator::elbowPitch(int speed_El_Pitch){
 void Actuator::wristPitch(bool direction){
 	//TODO implement servo logic
 	if(direction){
-		_servoState = _servoState - 4;
+		_servoState = _servoState - 1;
 		if(_servoState < 28){
 			//_servoState = 28;
 		}
 	}else{
-		_servoState = _servoState + s4;
+		_servoState = _servoState + 1;
 		if(_servoState > 120){
 		//	_servoState = 120;
 		}

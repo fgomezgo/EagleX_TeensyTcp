@@ -45,7 +45,6 @@
 #define AM2301 21
 
 
-
 class Feedback{
     public:
         Feedback(char LIS3DH_CS[4], char LIS3DH_MOSI, char LIS3DH_MISO, char LIS3DH_CLK,uint8_t pin, uint8_t type, uint8_t count=6);

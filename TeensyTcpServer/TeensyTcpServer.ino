@@ -124,12 +124,12 @@ void loop() {
 				}
 				time_old = millis();
 			}else{
-				cState = LOC_UPDATE;
+				//cState = LOC_UPDATE;
 			}
 			//Serial.println((millis() - time_old));
 			//Serial.println((millis() - time_old));
 				if(!flag_received & ((millis() - time_old) > 10000)){
-					Serial.println("HOLOO");
+					Serial.println(" ---- Comms Reset ---");
 					comms.start();
 				}
 			break;
@@ -196,16 +196,20 @@ void loop() {
 			break;
 		
 		case ACT_GRIPPER_ALL_SP:
-			int wristYaw_speed, wristRoll_speed, gripperRoll_speed;
+			int wristPitch_speed, extraction_state, wristRoll_speed, gripperRoll_speed;
 			Serial.println(request,HEX);
 			// Get individual speeds
-			wristYaw_speed = request & 0xFF;
+			wristPitch_speed = request & 0x03;
+			extraction_state = (request & 0xFC) >> 2;
+			Serial.print("CIENCEEEE ");
+			Serial.println(extraction_state);
+
 			wristRoll_speed = (request >> 8) & 0xFF;
 			gripperRoll_speed = (request >> 16);
 			// Parse direction
-			if (wristYaw_speed >> 7){
-				wristYaw_speed = wristYaw_speed & 0x7F;
-				wristYaw_speed = -wristYaw_speed;
+			if (wristPitch_speed >> 7){
+				wristPitch_speed = wristPitch_speed & 0x7F;
+				wristPitch_speed = -wristPitch_speed;
 			}
 			if (wristRoll_speed >> 7){
 				wristRoll_speed = wristRoll_speed & 0x7F;
@@ -217,19 +221,20 @@ void loop() {
 			}
 			Serial.print("ARM MOVING: ");
 			Serial.print("Wrist Yaw: ");
-			Serial.print(wristYaw_speed);
+			Serial.print(wristPitch_speed);
 			Serial.print(" Wrist Roll: ");
 			Serial.print(wristRoll_speed);
 			Serial.print(" Gripper Roll: ");
 			Serial.println(gripperRoll_speed);
 			// Set actuator speed
-			if(wristYaw_speed == 1){
+			if(wristPitch_speed == 1){
 				actuator.wristPitch(true);
-			}else if (wristYaw_speed == 2){
+			}else if (wristPitch_speed == 2){
 				actuator.wristPitch(false);
 			}
 			actuator.wristRoll(wristRoll_speed);
 			actuator.gripperRoll(gripperRoll_speed);
+			actuator.setCache(extraction_state);
 			cState = IDLE;
 			break;
 

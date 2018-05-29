@@ -33,9 +33,15 @@ void Actuator::controllerConfigureReset(){
 	// Requires to identify baudrate
 	Serial3.write(0xAA); // send baud-indicator byte
 	// clear the safe-start violation and let the motor run
+	
 	controllerExitSafeStart();
+	_servoState = 20;
 	_wristPitch.attach(14);
-	_wristPitch.write(92);
+	_wristPitch.write(_servoState);
+
+	// Set position of exctractor to 0
+	_revolverSampler.attach(3);
+	_revolverSampler.write(15);
 }
 // Used to read incoming information from the SMC
 int Actuator::controllerReadByte(){
@@ -151,14 +157,14 @@ void Actuator::elbowPitch(int speed_El_Pitch){
 void Actuator::wristPitch(bool direction){
 	//TODO implement servo logic
 	if(direction){
-		_servoState = _servoState - 4;
+		_servoState = _servoState - 1;
 		if(_servoState < 28){
-			_servoState = 28;
+			//_servoState = 28;
 		}
 	}else{
-		_servoState = _servoState + 4;
+		_servoState = _servoState + 1;
 		if(_servoState > 120){
-			_servoState = 120;
+		//	_servoState = 120;
 		}
 	}
 	_wristPitch.write(_servoState);
@@ -169,6 +175,23 @@ void Actuator::wristRoll(int speed_Wrs_Roll){
 	//delay(200);
 }
 
+void Actuator::setCache(char sample){
+	switch(sample){
+		case 1:
+			_revolverSampler.write(0);
+			break;
+		case 2:
+			_revolverSampler.write(60);
+			break;
+		case 4:
+			_revolverSampler.write(120);
+			break;
+		case 8:
+			_revolverSampler.write(170);
+			break;
+	}
+	
+}
 
 /* -------------- Gripper Controller -------------- */
 void Actuator::gripperRoll(int speed_Gri_Roll){

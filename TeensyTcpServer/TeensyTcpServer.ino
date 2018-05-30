@@ -152,9 +152,9 @@ void loop() {
 			Serial.print("right: ");
 			Serial.print(rightSide);
 			Serial.println();
-			data = String(actuator.driveGetTemp(2)) + String(actuator.driveGetVoltage(2));
+			//data = String(actuator.driveGetTemp(2)) + String(actuator.driveGetVoltage(2));
 			//Serial.println(actuator.driveGetTemp(2));
-			comms.write(data);
+			//comms.write(data);
 			actuator.driveSetAllSpeed(leftSide, rightSide);
 			cState = IDLE;
 			break;

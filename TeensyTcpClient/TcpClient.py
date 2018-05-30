@@ -209,27 +209,6 @@ class RoverComms():
             data = bytearray([0x00, left_speed, right_speed, 0x00])
 
             self.socket.sendto(data, self.address) #send command to arduino
-            try:
-                data, addr = self.socket.recvfrom(25) #Read response from arduino
-                self.generic_diagnostic_status.level = 0
-                self.generic_diagnostic_status.name = 'Motor Controllers  avg V/Temp'
-                self.generic_diagnostic_status.message = 'Average voltage and temperature of drivers'
-                self.generic_diagnostic_status.hardware_id = '1'
-                # Add values
-                self.sh_yaw_temp_key_value = KeyValue()
-                self.sh_yaw_temp_key_value.key = 'AVG Voltage:'
-                self.sh_yaw_temp_key_value.value = str(float(data[0:3])/10.0) + ' C'
-                self.generic_diagnostic_status.values.append(self.sh_yaw_temp_key_value)
-
-                self.sh_pitch_temp_key_value = KeyValue()
-                self.sh_pitch_temp_key_value.key = 'AVG Temp:'
-                self.sh_pitch_temp_key_value.value = str(float(data[3:8])/1000.0) + ' V'
-                self.generic_diagnostic_status.values.append(self.sh_pitch_temp_key_value)
-
-                #Append other diagnostics
-                self.generic_diagnostic_array.status.append(self.generic_diagnostic_status)
-            except:
-                pass
             self.joyL_change = 0
             self.joyR_change = 0
 

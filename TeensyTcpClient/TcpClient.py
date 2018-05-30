@@ -120,23 +120,26 @@ class RoverComms():
 
         
         # Joystick
-
+        self.mdj_2 = 0
         self.mdj_6 = 0
         self.mdj_7 = 0
         self.mdj_8 = 0
         self.mdj_9 = 0
 
+        self.mdj_2_change = 0
         self.mdj_6_change = 0
         self.mdj_7_change = 0
         self.mdj_8_change = 0
         self.mdj_9_change = 0
 
+        self.mdj_2_old = 0
         self.mdj_6_old = 0
         self.mdj_7_old = 0
         self.mdj_8_old = 0
         self.mdj_9_old = 0
 
         self.science_Revolver = 0
+
 
         """ Cooling System """
         self.SH = 0
@@ -333,6 +336,7 @@ class RoverComms():
                 self.PUaD_change = 0
 
         """ Science Revolver Servo """
+
         # Button 6
         if  self.mdj_6_old != self.mdj_6:
             self.mdj_6_change = 1
@@ -440,8 +444,21 @@ class RoverComms():
             self.mdj_7_change = 0
             self.mdj_8_change = 0
             self.mdj_9_change = 0
-            
+#TEPOROCHO#######################################################################################
+        # Button 2###
+        if(self.mdj_2_old != self.mdj_2):
+            self.mdj_2_change = 1
+            self.mdj_2_old = self.mdj_2
 
+        # Data teporocho #################################################################################################
+        if (self.mdj_2_change == 1) :
+            if (self.mdj_2 == 1 ):
+                # Concatenate values
+                data = bytearray([0x00,0x00,0x00, 0x06])
+                self.socket.sendto(data, self.address) #send command to arduino
+            # Reset changes
+            self.mdj_2_change = 0
+            """"""""""""""""""""""""""""""""""""
         ##################### Cooling System #####################
         if self.OP == 1:
             self.cool_left ^= 1
@@ -608,6 +625,7 @@ class RoverComms():
     #############################################################
     def joyMCJCallBack(self, data):
     #############################################################
+        self.mdj_2 = data.buttons[1]
         self.mdj_6 = data.buttons[5]
         self.mdj_7 = data.buttons[6]
         self.mdj_8 = data.buttons[7]

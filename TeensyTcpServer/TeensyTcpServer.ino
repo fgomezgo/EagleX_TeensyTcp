@@ -25,6 +25,7 @@ typedef enum{
 	IDLE,     // Awaits for communication  and gets the id
 	ACT_DRIVE_ALL_SP,		//? Drive System Controllers
 	ACT_ARM_ALL_SP,			//? ARM Controllers (Arm yaw, Shoulder pitch, Elbow pitch)
+	Teporocho,			
 	ACT_GRIPPER_ALL_SP,		//? Wrist Controllers
 	ACT_COOLING_SET,		//? Cooling System
 	FEE_UPD_SUSPS,			//? IMU
@@ -84,6 +85,9 @@ void loop() {
 				switch(header){  
 					case 0x00:
 						cState = ACT_DRIVE_ALL_SP;		//? SET left and right speed 
+						break;
+					case 0x06:
+						cState = Teporocho; 		//? Teporocho
 						break;
 					case 0x07:
 						cState = ACT_ARM_ALL_SP; 		//? Arm controllers
@@ -160,6 +164,22 @@ void loop() {
 			cState = IDLE;
 			break;
 		
+		case Teporocho:
+			delay(2000);
+			 	float h = dht.readHumidity();
+				float t = dht.readTemperature();
+				float f = dht.readTemperature(true);
+				if (isnan(h) || isnan(t) || isnan(f)) {
+					Serial.println("Failed to read from DHT sensor!");
+					break;
+				}
+				data = String("Humidity: "+h+" porcentaje "+" Temperature:  "+t+" C "+f+" F "+(t+273)+" K ");
+			break;
+		"
+
+			cState = IDLE;
+			break;
+
 		case ACT_ARM_ALL_SP:
 			int shoulderYaw_speed, shoulderPitch_speed, elbowPitch_speed;
 			Serial.println(request,HEX);

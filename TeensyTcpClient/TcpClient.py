@@ -198,7 +198,7 @@ class RoverComms():
         try:
             data = bytearray([0x00,self.pos.data[1],self.pos.data[0],0x07])
             self.socket.sendto(data, self.address) #send command to arduino
-            rospy.loginfo("INFO: Shoulder moving: LEFT")
+            rospy.loginfo("INFO: Servos moving")
         except:
             pass
         ##################### Cooling System #####################

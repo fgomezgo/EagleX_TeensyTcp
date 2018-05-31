@@ -178,8 +178,8 @@ float Feedback::encodersReadLeft(){
         rads[2]=0;
     }
     //! Change this to return the AVG of threee encoders
-    return (rads[0] + rads[1] + rads[2]) / 3.0;
- 
+    //return (rads[0] + rads[1] + rads[2]) / 3.0;
+    return (rads[0] + rads[1]) / 2.0;
 }
 
 float Feedback::encodersReadRight(){
@@ -221,6 +221,9 @@ float Feedback::encodersReadRight(){
     }
     //! Change this to return the AVG of threee encoders
     return (rads[3] + rads[4] + rads[5]) / 3.0;
+    //return rads[3];
+    //return rads[3];
+    //return rads[5];
  
 }
 

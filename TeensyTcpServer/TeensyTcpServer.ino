@@ -22,7 +22,8 @@ Feedback feedback(LIS3DH_CS, 0, 1, 32);
 unsigned int real_Speed_Left = 0;
 unsigned int real_Speed_Right = 0;
 unsigned int real_Speed = 0;
-
+boolean flag_imu = false;
+boolean flag_accel = false;
 Encoder encL1(29, 30);
 Encoder encL2(27, 28);
 Encoder encL3(2, 26);
@@ -65,16 +66,18 @@ void setup() {
 	location.moduleConfigure();
 	delay(1000);
 	actuator.controllerConfigureReset();
-
+	
 	if(feedback.suspensionImuConf()){
 		Serial.println("ERROR: Accelerometer intitialization");
 	}else{
 		Serial.println("MSG: Accelerometers detected");
+		flag_accel = true;
 	}
 	if(feedback.chassisImuConf()){
 		Serial.println("ERROR: 10-DOF intitialization");
 	}else{
 		Serial.println("MSG: 10-DOF detected");
+		flag_imu = true;
 	}
 	feedback.encodersInit(&encL1, &encL2, &encL3, &encR1, &encR2, &encR3);
 	//Set next state
@@ -212,42 +215,59 @@ void loop() {
 			break;
 
 		case FEE_UPD_SUSPS:
-			feedback.suspensionImuUpdate();
+			if( flag_imu){
+				feedback.suspensionImuUpdate();
+			}
+			
 			cState = IDLE;
 			break;
 
 		case FEE_GET_SUSP1:
-			comms.writePrecision(feedback.getSuspensionRB(),5);
+			if( flag_accel){
+				comms.writePrecision(feedback.getSuspensionRB(),5);
+			}
 			cState = IDLE;
 			break;
 
 		case FEE_GET_SUSP2:
-			comms.writePrecision(feedback.getSuspensionRF(),5);
+			if( flag_accel){
+				comms.writePrecision(feedback.getSuspensionRF(),5);
+			}
 			cState = IDLE;
 			break;
 
 		case FEE_GET_SUSP3:
-			comms.writePrecision(feedback.getSuspensionLF(),5);
+			if( flag_accel){
+				comms.writePrecision(feedback.getSuspensionLF(),5);
+			}
 			cState = IDLE;
 			break;
 
 		case FEE_GET_SUSP4:
-			comms.writePrecision(feedback.getSuspensionLB(),5);
+			if( flag_accel){
+				comms.writePrecision(feedback.getSuspensionLB(),5);
+			}
 			cState = IDLE;
 			break;
 
 		case FEE_GET_CHASS_ROLL:
-			comms.writePrecision(feedback.getChassisRoll(),5);
+			if( flag_imu){
+				comms.writePrecision(feedback.getChassisRoll(),5);
+			}
 			cState = IDLE;
 			break;
 
 		case FEE_GET_CHASS_PITCH:
-			comms.writePrecision(feedback.getChassisPitch(),5);
+			if( flag_imu){
+				comms.writePrecision(feedback.getChassisPitch(),5);
+			}
 			cState = IDLE;
 			break;
 
 		case FEE_GET_CHASS_YAW:
-			comms.writePrecision(feedback.getChassisYaw(),5);
+			if( flag_imu){
+				comms.writePrecision(feedback.getChassisYaw(),5);
+			}
 			cState = IDLE;
 			break;
 		

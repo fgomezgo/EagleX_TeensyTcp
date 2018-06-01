@@ -22,20 +22,14 @@ Feedback feedback(LIS3DH_CS, 0, 1, 32);
 // States
 typedef enum{
 	IDLE,     // Awaits for communication  and gets the id
+	COMMS_RESET,
 	ACT_DRIVE_ALL_SP,		//? Drive System Controllers
 	ACT_ARM_ALL_SP,			//? ARM Controllers (Arm yaw, Shoulder pitch, Elbow pitch)
+	ACT_RESET_ALL,			//? Resets all drivers and disables the SMC safety.
 	ACT_GRIPPER_ALL_SP,		//? Wrist Controllers
 	ACT_COOLING_SET,		//? Cooling System
-	FEE_UPD_SUSPS,			//? IMU
-	FEE_GET_SUSP1,
-	FEE_GET_SUSP2,
-	FEE_GET_SUSP3,
-	FEE_GET_SUSP4,
-	FEE_GET_CHASS_ROLL,
-	FEE_GET_CHASS_PITCH,
-	FEE_GET_CHASS_YAW,
 	LOC_UPDATE,				//? Location
-	LOC_GET_LAT,
+	LOC_GET_LAT,				
 	LOC_GET_LON,
 	LOC_NO_FIX,
 	TEST,
@@ -48,20 +42,14 @@ void setup() {
 
 	comms.start();
 	location.moduleConfigure();
-	delay(1000);
+	delay(500);
 	actuator.controllerConfigureReset();
 
-	if(feedback.suspensionImuConf()){
-		Serial.println("ERROR: Accelerometer intitialization");
-	}else{
-		Serial.println("MSG: Accelerometers detected");
-	}
 	if(feedback.chassisImuConf()){
 		Serial.println("ERROR: 10-DOF intitialization");
 	}else{
 		Serial.println("MSG: 10-DOF detected");
 	}
-
 	//Set next state
 	cState = IDLE;
 	time_old = millis();
@@ -93,27 +81,6 @@ void loop() {
 					case 0x0D:
 						cState = ACT_COOLING_SET;	//? Cooling System
 						break;
-					case 0x0E:
-						cState = FEE_GET_SUSP1;		//? IMU
-						break;
-					case 0x4E:
-						cState = FEE_GET_SUSP2;
-						break;
-					case 0x8E:
-						cState = FEE_GET_SUSP3;
-						break;
-					case 0xCE:
-						cState = FEE_GET_SUSP4;
-						break;
-					case 0x0F:
-						cState = FEE_GET_CHASS_ROLL;
-						break;
-					case 0x4F:
-						cState = FEE_GET_CHASS_PITCH;
-						break;
-					case 0x8F:
-						cState = FEE_GET_CHASS_YAW;
-						break;
 					case 0x11:
 						cState = LOC_GET_LAT;		//? Location
 						break;
@@ -123,19 +90,19 @@ void loop() {
 				}
 				time_old = millis();
 			}else{
-				//cState = LOC_UPDATE;
+				cState = LOC_UPDATE;
 			}
-			//Serial.println((millis() - time_old));
-			//Serial.println((millis() - time_old));
-				if(!flag_received & ((millis() - time_old) > 10000)){
-					Serial.println(" ---- Comms Reset ---");
-					comms.start();
-				}
+			if(!flag_received && ((millis() - time_old) > 10000)){
+				cState = COMMS_RESET;
+			}
 			break;
-
+		case COMMS_RESET:
+			comms.start();
+			Serial.println("Comms RESET");
+			cState = IDLE;
+			break;
 		case ACT_DRIVE_ALL_SP:
 			int leftSide,rightSide;
-			
 			rightSide =  request & 0xFF;
 			leftSide = request >> 8;
 			if (rightSide >> 7){
@@ -146,19 +113,12 @@ void loop() {
 				leftSide = leftSide & 0x7F;
 				leftSide = -leftSide;
 			}
-			Serial.print("left: ");
-			Serial.print(leftSide);
+			Serial.print("left: "); Serial.print(leftSide);
 			Serial.print(" ");
-			Serial.print("right: ");
-			Serial.print(rightSide);
-			Serial.println();
-			//data = String(actuator.driveGetTemp(2)) + String(actuator.driveGetVoltage(2));
-			//Serial.println(actuator.driveGetTemp(2));
-			//comms.write(data);
+			Serial.print("right: "); Serial.println(rightSide);
 			actuator.driveSetAllSpeed(leftSide, rightSide);
 			cState = IDLE;
 			break;
-		
 		case ACT_ARM_ALL_SP:
 			int shoulderYaw_speed, shoulderPitch_speed, elbowPitch_speed;
 			Serial.println(request,HEX);
@@ -180,12 +140,9 @@ void loop() {
 				elbowPitch_speed = -elbowPitch_speed;
 			}
 			Serial.print("ARM MOVING: ");
-			Serial.print("SH Yaw: ");
-			Serial.print(shoulderYaw_speed);
-			Serial.print(" SH Pitch: ");
-			Serial.print(shoulderPitch_speed);
-			Serial.print(" EL Pitch: ");
-			Serial.println(elbowPitch_speed);
+			Serial.print("SH Yaw: "); Serial.print(shoulderYaw_speed);
+			Serial.print(" SH Pitch: "); Serial.print(shoulderPitch_speed);
+			Serial.print(" EL Pitch: "); Serial.println(elbowPitch_speed);
 			// Set actuator speed
 			actuator.shoulderYaw(shoulderYaw_speed);
 			actuator.shoulderPitch(shoulderPitch_speed);
@@ -193,16 +150,12 @@ void loop() {
 
 			cState = IDLE;
 			break;
-		
 		case ACT_GRIPPER_ALL_SP:
 			int wristPitch_speed, extraction_state, wristRoll_speed, gripperRoll_speed;
-			Serial.println(request,HEX);
+			//Serial.println(request,HEX);
 			// Get individual speeds
 			wristPitch_speed = request & 0x03;
 			extraction_state = (request & 0xFC) >> 2;
-			Serial.print("CIENCEEEE ");
-			Serial.println(extraction_state);
-
 			wristRoll_speed = (request >> 8) & 0xFF;
 			gripperRoll_speed = (request >> 16);
 			// Parse direction
@@ -218,13 +171,11 @@ void loop() {
 				gripperRoll_speed = gripperRoll_speed & 0x7F;
 				gripperRoll_speed = -gripperRoll_speed;
 			}
-			Serial.print("ARM MOVING: ");
-			Serial.print("Wrist Yaw: ");
-			Serial.print(wristPitch_speed);
-			Serial.print(" Wrist Roll: ");
-			Serial.print(wristRoll_speed);
-			Serial.print(" Gripper Roll: ");
-			Serial.println(gripperRoll_speed);
+			Serial.print("GRIPPER MOVING: ");
+			Serial.print("Wrist Yaw: "); Serial.print(wristPitch_speed);
+			Serial.print(" Wrist Roll: "); Serial.print(wristRoll_speed);
+			Serial.print(" Gripper Roll: "); Serial.print(gripperRoll_speed);
+			Serial.print("Revolver state: "); Serial.println(extraction_state);
 			// Set actuator speed
 			if(wristPitch_speed == 1){
 				actuator.wristPitch(true);
@@ -236,51 +187,10 @@ void loop() {
 			actuator.setCache(extraction_state);
 			cState = IDLE;
 			break;
-
 		case ACT_COOLING_SET:
 			Serial.println("Cooling SET");
 			Serial.println(request, BIN);
 			actuator.coolingSet(request);
-			cState = IDLE;
-			break;
-
-		case FEE_UPD_SUSPS:
-			feedback.suspensionImuUpdate();
-			cState = IDLE;
-			break;
-
-		case FEE_GET_SUSP1:
-			comms.writePrecision(feedback.getSuspensionRB(),5);
-			cState = IDLE;
-			break;
-
-		case FEE_GET_SUSP2:
-			comms.writePrecision(feedback.getSuspensionRF(),5);
-			cState = IDLE;
-			break;
-
-		case FEE_GET_SUSP3:
-			comms.writePrecision(feedback.getSuspensionLF(),5);
-			cState = IDLE;
-			break;
-
-		case FEE_GET_SUSP4:
-			comms.writePrecision(feedback.getSuspensionLB(),5);
-			cState = IDLE;
-			break;
-
-		case FEE_GET_CHASS_ROLL:
-			comms.writePrecision(feedback.getChassisRoll(),5);
-			cState = IDLE;
-			break;
-
-		case FEE_GET_CHASS_PITCH:
-			comms.writePrecision(feedback.getChassisPitch(),5);
-			cState = IDLE;
-			break;
-
-		case FEE_GET_CHASS_YAW:
-			comms.writePrecision(feedback.getChassisYaw(),5);
 			cState = IDLE;
 			break;
 
@@ -290,7 +200,6 @@ void loop() {
 			break;
 
 		case LOC_GET_LAT:   // Gets latitude from GPS module and returns to client
-			
 			if(location.getFix()){
 				Serial.println("Latitude sent");
 				comms.writePrecision(location.getLatitude(),5);
@@ -299,7 +208,6 @@ void loop() {
 				cState = LOC_NO_FIX;
 			}
 			break;
-
 		case LOC_GET_LON:   // Gets longitude from GPS module and returns to client
 			if(location.getFix()){
 				Serial.println("Longitude sent");
@@ -309,7 +217,6 @@ void loop() {
 				cState = LOC_NO_FIX;
 			}
 			break;
-
 		case LOC_NO_FIX:  // If there is no FIX send error to host
 			// Send no fix error back
 			comms.write("-1");
@@ -317,7 +224,6 @@ void loop() {
 			cState = IDLE;
 			break;
 		case TEST:
-			Serial.println(actuator.driveGetVoltage(3));
 			break;
 
 		default:

@@ -35,26 +35,6 @@ void Feedback::suspensionImuUpdate(){
     }
 }
 
-float Feedback::getSuspensionRB(){
-    suspensionImuUpdate();
-    return _suspensionsAngle[0];
-}
-
-float Feedback::getSuspensionRF(){
-    suspensionImuUpdate();
-    return _suspensionsAngle[1];
-}
-
-float Feedback::getSuspensionLF(){
-    suspensionImuUpdate();
-    return _suspensionsAngle[2];
-}
-
-float Feedback::getSuspensionLB(){
-    suspensionImuUpdate();
-    return _suspensionsAngle[3];
-}
-
 bool Feedback::chassisImuConf(){
     bool flag = false;
     if(!_accel.begin())
@@ -95,17 +75,24 @@ void Feedback::chassisImuUpdate(){
     }
 }
 
-float Feedback::getChassisRoll(){
-    chassisImuUpdate();
-    return _suspensionsAngle[4];
+float Feedback::getPressure(){
+    Serial.print(_bmp_event.pressure);
 }
 
-float Feedback::getChassisPitch(){
-    chassisImuUpdate();
-    return _suspensionsAngle[5];
+float Feedback::getAltitude(){
+    float temperature;
+    _bmp.getTemperature(&temperature);
+    Serial.print(_bmp.pressureToAltitude(seaLevelPressure,
+                                        _bmp_event.pressure,
+                                        temperature));
 }
 
-float Feedback::getChassisYaw(){
-    chassisImuUpdate();
-    return _suspensionsAngle[6];
+float Feedback::getTempExt(){
+    float temperature;
+    _bmp.getTemperature(&temperature);
+    return temperature;
+}
+
+void Feedback::updatePressure(){
+    _bmp.getEvent(&_bmp_event);
 }

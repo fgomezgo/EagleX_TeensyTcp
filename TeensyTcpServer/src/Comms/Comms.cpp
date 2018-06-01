@@ -30,7 +30,7 @@ void Comms::start()
    moduleReset();
    Ethernet.begin(_mac, _ip); //Initialize Ethernet
    Udp.begin(_localPort); //Initialize Udp
-   delay(1500); //delay
+   delay(1500); //delay //! Delete if not needed
 }
 
 void Comms::writePrecision(float data, char precision){

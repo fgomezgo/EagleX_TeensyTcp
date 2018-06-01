@@ -117,7 +117,6 @@ class RoverComms():
         self.TR_change = 0
         self.CR_change = 0
         self.GRIPPER_ROLL_speed = 0
-
         
         # Joystick
 
@@ -143,15 +142,6 @@ class RoverComms():
         self.OP = 0
         self.cool_left = 0
         self.cool_right = 0
-        """ IMU """
-        self.time_nsec = 0
-        self.jointRB = 0
-        self.jointRF = 0
-        self.jointLF = 0
-        self.jointLB = 0
-        self.chassisR = 0
-        self.chassisP = 0
-        self.chassisY = 0
         """ Location variables """
         self.navsat = NavSatFix()
         self.time_sec = 0
@@ -431,80 +421,6 @@ class RoverComms():
             data = bytearray([0x00, 0x00, (self.cool_left << 1) | self.cool_right, 0x0D])
             self.socket.sendto(data, self.address) #send command to arduino
 
-        ##################### IMU #####################
-        
-        #if (rospy.Time.now().secs - self.time_nsec) >= 1:
-        """
-        data = bytearray([0x00, 0x00, 0x00, 0x0E])  # Suspension Right Back
-        self.socket.sendto(data, self.address) #send command to arduino
-        try:
-            data, addr = self.socket.recvfrom(15) #Read response from arduino
-            self.jointRB = data
-        except:
-            pass
-
-        data = bytearray([0x00, 0x00, 0x00, 0x4E])  # Suspension Right Front
-        self.socket.sendto(data, self.address) #send command to arduino
-        try:
-            data, addr = self.socket.recvfrom(15) #Read response from arduino
-            self.jointRF = data
-        except:
-            pass
-
-        data = bytearray([0x00, 0x00, 0x00, 0x8E])  # Suspension Left Front
-        self.socket.sendto(data, self.address) #send command to arduino
-        try:
-            data, addr = self.socket.recvfrom(15) #Read response from arduino
-            self.jointLF = data
-        except:
-            pass
-
-        data = bytearray([0x00, 0x00, 0x00, 0xCE])  # Suspension Left Back
-        self.socket.sendto(data, self.address) #send command to arduino
-        try:
-            data, addr = self.socket.recvfrom(15) #Read response from arduino
-            self.jointLB = data
-        except:
-            pass
-
-        data = bytearray([0x00, 0x00, 0x00, 0x0F])  # Suspension Left Back
-        self.socket.sendto(data, self.address) #send command to arduino
-        try:
-            data, addr = self.socket.recvfrom(15) #Read response from arduino
-            self.chassisR = data
-        except:
-            pass
-
-        data = bytearray([0x00, 0x00, 0x00, 0x4F])  # Suspension Left Back
-        self.socket.sendto(data, self.address) #send command to arduino
-        try:
-            data, addr = self.socket.recvfrom(15) #Read response from arduino
-            self.chassisP = data
-        except:
-            pass
-
-        data = bytearray([0x00, 0x00, 0x00, 0x8F])  # Suspension Left Back
-        self.socket.sendto(data, self.address) #send command to arduino
-        try:
-            data, addr = self.socket.recvfrom(15) #Read response from arduino
-            self.chassisY = data
-        except:
-            pass
-
-        #print "Acel: " + self.jointRB + " " + self.jointRF +" "+ self.jointLF + " " + self.jointLB +" "+ self.chassisP + " " + self.chassisR + " " + self.chassisY 
-
-        self.joints.header = Header()
-        self.joints.header.stamp = rospy.Time.now()
-
-        #self.joints.position = [float(self.chassisP), float(self.chassisR), float(self.chassisY), float(self.jointRB), float(self.jointLB), float(self.jointRF), float(self.jointLF)]
-        self.joints.position = [0, 0, 0, float(self.jointRB), float(self.jointLB), float(self.jointRF), float(self.jointLF)]
-        self.joints.velocity = []
-        self.joints.effort = []
-        self.imu.publish(self.joints)
-
-
-        self.time_nsec = rospy.Time.now().secs
-        """
         ##################### Location #####################
         """
         if (rospy.Time.now().secs - self.time_sec) >= 2:

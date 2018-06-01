@@ -19,20 +19,19 @@ class Feedback{
         Feedback(char LIS3DH_CS[4], char LIS3DH_MOSI, char LIS3DH_MISO, char LIS3DH_CLK);
         bool suspensionImuConf();
         void suspensionImuUpdate();
-        float getSuspensionRB();
-        float getSuspensionRF();
-        float getSuspensionLF();
-        float getSuspensionLB();
         bool chassisImuConf();
         void chassisImuUpdate();
-        float getChassisRoll();
-        float getChassisPitch();
-        float getChassisYaw();
+        float getPressure();
+        float getAltitude();
+        float getTempExt();
+        void updatePressure();
+
 
     private:
         Adafruit_LIS3DH _lis[4];
         float _suspensionsAngle[7];
         float _radsPerChange = 0.0523;
+        float seaLevelPressure = SENSORS_PRESSURE_SEALEVELHPA;
         /* Assign a unique ID to the sensors */
         Adafruit_10DOF                _dof   = Adafruit_10DOF();
         Adafruit_LSM303_Accel_Unified _accel = Adafruit_LSM303_Accel_Unified(30301);

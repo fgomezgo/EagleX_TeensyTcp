@@ -464,7 +464,7 @@ class RoverComms():
             self.mdj_2_change = 0
             """"""""""""""""""""""""""""""""""""
             try:
-                data, addr = self.socket.recvfrom(45) #Read response from arduino
+                data, addr = self.socket.recvfrom(50) #Read response from arduino
                 self.teporocho_2 = data
                 print data
             except:

@@ -65,7 +65,7 @@ void setup() {
 	}else{
 		Serial.println("MSG: 10-DOF detected");
 	}
-
+	feedback.begin(VEML6070_1_T);  // pass in the integration time constant
 	//Set next state
 	cState = IDLE;
 	time_old = millis();
@@ -179,7 +179,7 @@ void loop() {
 				Serial.println("Failed to read from DHT sensor!");
 				break;
 			}	
-			data = String( hs +","+ ts +","+ fs + ","+ks + ","+ String(feedback.getPressure()) + ","+ String(feedback.getAltitude()) + ","+ String(feedback.getTempExt()));
+			data = String( hs +","+ ts +","+ fs + ","+ks + ","+ String(feedback.getPressure()) + ","+ String(feedback.getAltitude()) + ","+ String(feedback.getTempExt()) + "," + String(feedback.readUV()));
 			comms.write(data);
 
 			Serial.print("Humedad");

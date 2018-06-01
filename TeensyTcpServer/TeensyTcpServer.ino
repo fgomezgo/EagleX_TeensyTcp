@@ -67,7 +67,7 @@ void setup() {
 	}
 
 	//Set next state
-	cState = Teporocho;
+	cState = IDLE;
 	time_old = millis();
 }
 
@@ -158,9 +158,6 @@ void loop() {
 			Serial.print("right: ");
 			Serial.print(rightSide);
 			Serial.println();
-			data = String(actuator.driveGetTemp(2)) + String(actuator.driveGetVoltage(2));
-			//Serial.println(actuator.driveGetTemp(2));
-			comms.write(data);
 			actuator.driveSetAllSpeed(leftSide, rightSide);
 			cState = IDLE;
 			break;
@@ -189,7 +186,7 @@ void loop() {
 			Serial.print(feedback.readHumidity());
 			Serial.print("Temperatura");
 			Serial.println(feedback.readTemperature());
-			//cState = IDLE;
+			cState = IDLE;
 		}break;
 
 		case ACT_ARM_ALL_SP:

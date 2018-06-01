@@ -4,7 +4,7 @@
 #include "src/Location/Location.h"
 #include "src/Actuator/Actuator.h"
 #include "src/Feedback/Feedback.h"
-#define DHTPIN 26
+#define DHTPIN 39
 #define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321 	
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEE}; //Assign a mac address
 IPAddress ip(192, 168, 1, 200); //Assign my IP adress
@@ -67,7 +67,7 @@ void setup() {
 	}
 
 	//Set next state
-	cState = IDLE;
+	cState = Teporocho;
 	time_old = millis();
 }
 
@@ -189,7 +189,7 @@ void loop() {
 			Serial.print(feedback.readHumidity());
 			Serial.print("Temperatura");
 			Serial.println(feedback.readTemperature());
-			cState = IDLE;
+			//cState = IDLE;
 		}break;
 
 		case ACT_ARM_ALL_SP:

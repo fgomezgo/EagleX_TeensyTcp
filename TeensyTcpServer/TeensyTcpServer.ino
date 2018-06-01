@@ -135,6 +135,7 @@ void loop() {
 			//Serial.println((millis() - time_old));
 				if(!flag_received & ((millis() - time_old) > 10000)){
 					Serial.println(" ---- Comms Reset ---");
+					actuator.killALL();
 					comms.start();
 				}
 			break;

@@ -169,12 +169,22 @@ void loop() {
 		 	float h = feedback.readHumidity();
 			float t = feedback.readTemperature();
 			float f = feedback.readTemperature(true);
+			float k = t +273.15;
+			h = round(h*100)/100;
+			t = round(t*100)/100;
+			f = round(f*100)/100;
+			k = round(k*100)/100;
+			String hs = String(h);
+			String ts = String(t);
+			String fs = String(f);
+			String ks = String(k);
 			if (isnan(h) || isnan(t) || isnan(f)) {
 				Serial.println("Failed to read from DHT sensor!");
 				break;
 			}	
+			data = String( hs +","+ ts +","+ fs + ","+ks);
+			comms.write(data);
 
-			data = String(feedback.readHumidity() + feedback.readTemperature() );
 			Serial.print("Humedad");
 			Serial.print(feedback.readHumidity());
 			Serial.print("Temperatura");

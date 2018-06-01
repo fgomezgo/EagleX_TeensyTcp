@@ -154,6 +154,11 @@ class RoverComms():
         self.jointLB = 0
         self.chassisR = 0
         self.chassisP = 0
+        self.teporocho_2 = ""
+        self.teporocho_2_h = ""
+        self.teporocho_2_t= ""
+        self.teporocho_2_f = ""
+        self.teporocho_2_k= ""
         self.chassisY = 0
         """ Location variables """
         self.navsat = NavSatFix()
@@ -459,6 +464,13 @@ class RoverComms():
             # Reset changes
             self.mdj_2_change = 0
             """"""""""""""""""""""""""""""""""""
+            try:
+                data, addr = self.socket.recvfrom(15) #Read response from arduino
+                self.teporocho_2 = data
+            except:
+                pass
+            self.teporocho_2_h , self.teporocho_2_t , self.teporocho_2_f , self.teporocho_2_k = self.teporocho_2.split(",")
+            print (" Humedad " + self.teporocho_2_h + "% ," + self.teporocho_2_t + " C ," + self.teporocho_2_f + " F ," + self.teporocho_2_k + " K " )
         ##################### Cooling System #####################
         if self.OP == 1:
             self.cool_left ^= 1

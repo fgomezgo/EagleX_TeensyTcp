@@ -365,3 +365,31 @@ uint32_t Feedback::expectPulse(bool level) {
   return count;
 }
 
+float Feedback::getPressure(){
+    updatePressure();
+    Serial.print(_bmp_event.pressure);
+    return _bmp_event.pressure;
+}
+
+float Feedback::getAltitude(){
+    float temperature;
+    updatePressure();
+    _bmp.getTemperature(&temperature);
+    Serial.print(_bmp.pressureToAltitude(_seaLevelPressure,
+                                        _bmp_event.pressure,
+                                        temperature));
+    return _bmp.pressureToAltitude(_seaLevelPressure,
+                                        _bmp_event.pressure,
+                                        temperature);
+}
+
+float Feedback::getTempExt(){
+    float temperature;
+    updatePressure();
+    _bmp.getTemperature(&temperature);
+    return temperature;
+}
+
+void Feedback::updatePressure(){
+    _bmp.getEvent(&_bmp_event);
+}

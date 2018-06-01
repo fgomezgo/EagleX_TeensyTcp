@@ -78,6 +78,13 @@ void Actuator::driveSetAllSpeed(int speedLeft, int speedRight){
 	
 }
 
+void Actuator::killALL(){
+	for(int i = 1; i < 12; i++){		// Drivers 1-3
+		driveSetSpeed(0, i);
+		delay(5); // Is it needed?
+	}
+}
+
 // Returns avg voltage of all SMC at the rover
 unsigned int Actuator::driveGetAvgVoltage(){
 	unsigned int avg = 0;

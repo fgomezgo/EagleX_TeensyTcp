@@ -461,11 +461,10 @@ class RoverComms():
                 # Concatenate values
                 data = bytearray([0x00,0x00,0x00, 0x06])
                 self.socket.sendto(data, self.address) #send command to arduino
-            # Reset changes
             self.mdj_2_change = 0
             """"""""""""""""""""""""""""""""""""
             try:
-                data, addr = self.socket.recvfrom(15) #Read response from arduino
+                data, addr = self.socket.recvfrom(45) #Read response from arduino
                 self.teporocho_2 = data
                 print data
             except:
@@ -485,7 +484,6 @@ class RoverComms():
   
      
         ##################### Location #####################
-        """
         if (rospy.Time.now().secs - self.time_sec) >= 2:
             rospy.loginfo("INFO: Location: Query")
 
@@ -522,7 +520,6 @@ class RoverComms():
         
         # Publish 
         self.current_status.publish(self.generic_diagnostic_array)
-        """
         """        # dx = (l + r) / 2
         # dr = (r - l) / w
             

@@ -129,7 +129,7 @@ void loop() {
 				}
 				time_old = millis();
 			}else{
-				//cState = LOC_UPDATE;
+				cState = LOC_UPDATE;
 			}
 			//Serial.println((millis() - time_old));
 			//Serial.println((millis() - time_old));
@@ -179,7 +179,7 @@ void loop() {
 				Serial.println("Failed to read from DHT sensor!");
 				break;
 			}	
-			data = String( hs +","+ ts +","+ fs + ","+ks);
+			data = String( hs +","+ ts +","+ fs + ","+ks + ","+ String(feedback.getPressure()) + ","+ String(feedback.getAltitude()) + ","+ String(feedback.getTempExt()));
 			comms.write(data);
 
 			Serial.print("Humedad");

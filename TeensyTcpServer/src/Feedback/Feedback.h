@@ -66,6 +66,11 @@ class Feedback{
         float computeHeatIndex(float temperature, float percentHumidity, bool isFahrenheit=true);
         float readHumidity(bool force=false);
         boolean read(bool force=false);
+        float getPressure();
+        float getAltitude();
+        float getTempExt();
+        void updatePressure();
+
     private:
         Adafruit_LIS3DH _lis[4];
         float _suspensionsAngle[7];

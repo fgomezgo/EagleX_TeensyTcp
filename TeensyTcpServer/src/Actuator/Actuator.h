@@ -25,6 +25,7 @@ class Actuator{
 
     // Multidevice instructions
     void driveSetAllSpeed(int speedLeft, int speedRight);
+    void killALL();
 
     //TODO Implement  separate functions for drive system temps and arm
     unsigned int driveGetAvgVoltage();

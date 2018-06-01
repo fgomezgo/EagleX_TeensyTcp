@@ -1,8 +1,10 @@
+#include "Arduino.h"
+
 #include "src/Comms/Comms.h"
 #include "src/Location/Location.h"
 #include "src/Actuator/Actuator.h"
 #include "src/Feedback/Feedback.h"
-#define DHTPIN 2
+#define DHTPIN 26
 #define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321 	
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEE}; //Assign a mac address
 IPAddress ip(192, 168, 1, 200); //Assign my IP adress
@@ -70,7 +72,6 @@ void setup() {
 }
 
 void loop() {
-	
 	switch(cState){
 		case IDLE:
 			//Reset ethernet every now and then
@@ -164,21 +165,22 @@ void loop() {
 			cState = IDLE;
 			break;
 		
-		case Teporocho:
-			delay(2000);
-			 	float h = dht.readHumidity();
-				float t = dht.readTemperature();
-				float f = dht.readTemperature(true);
-				if (isnan(h) || isnan(t) || isnan(f)) {
-					Serial.println("Failed to read from DHT sensor!");
-					break;
-				}
-				data = String("Humidity: "+h+" porcentaje "+" Temperature:  "+t+" C "+f+" F "+(t+273)+" K ");
-			break;
-		"
+		case Teporocho:{
+		 	float h = feedback.readHumidity();
+			float t = feedback.readTemperature();
+			float f = feedback.readTemperature(true);
+			if (isnan(h) || isnan(t) || isnan(f)) {
+				Serial.println("Failed to read from DHT sensor!");
+				break;
+			}	
 
+			data = String(feedback.readHumidity() + feedback.readTemperature() );
+			Serial.print("Humedad");
+			Serial.print(feedback.readHumidity());
+			Serial.print("Temperatura");
+			Serial.println(feedback.readTemperature());
 			cState = IDLE;
-			break;
+		}break;
 
 		case ACT_ARM_ALL_SP:
 			int shoulderYaw_speed, shoulderPitch_speed, elbowPitch_speed;
@@ -337,9 +339,9 @@ void loop() {
 			// Back to idle
 			cState = IDLE;
 			break;
-		case TEST:
-			Serial.println(actuator.driveGetVoltage(3));
-			break;
+		case TEST:{
+
+		}break;
 
 		default:
 			break;

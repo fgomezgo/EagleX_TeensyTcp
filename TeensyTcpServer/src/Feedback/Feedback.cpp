@@ -2,7 +2,6 @@
   Eagle X's rover feedback/IMU library Feedback.h - Library for managing feedback signals 
   from encoders, actuators, IMU
 */
-#include "Arduino.h"
 #include "Feedback.h"
 
 

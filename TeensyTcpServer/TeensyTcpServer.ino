@@ -42,6 +42,7 @@ typedef enum{
 	LOC_GET_LAT,
 	LOC_GET_LON,
 	LOC_NO_FIX,
+	FEE_UV,
 	TEST,
 }ServerStates;
 
@@ -54,6 +55,7 @@ void setup() {
 	location.moduleConfigure();
 	delay(1000);
 	actuator.controllerConfigureReset();
+	
 
 	if(feedback.suspensionImuConf()){
 		Serial.println("ERROR: Accelerometer intitialization");
@@ -67,7 +69,8 @@ void setup() {
 	}
 
 	//Set next state
-	cState = IDLE;
+	feedback.begin(VEML6070_1_T);  // pass in the integration time constant
+	cState = TEST;
 	time_old = millis();
 }
 
@@ -125,6 +128,9 @@ void loop() {
 						break;
 					case 0x51:
 						cState = LOC_GET_LON;
+						break;
+					case 0x0A:
+						cState = FEE_UV;
 						break;
 				}
 				time_old = millis();
@@ -339,7 +345,18 @@ void loop() {
 			// Back to idle
 			cState = IDLE;
 			break;
+		
+		case FEE_UV:
+			comms.write(feedback.readUV());
+			cState = IDLE;
+			break;
+
 		case TEST:{
+			Serial.print("UV light level: ");
+			Serial.println(feedback.readUV());
+			comms.write(feedback.readUV());
+			
+			break;
 
 		}break;
 

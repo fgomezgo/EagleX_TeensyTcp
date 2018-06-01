@@ -14,6 +14,23 @@
 #include <Adafruit_L3GD20_U.h>
 #include <Adafruit_10DOF.h>
 
+// really unusual way of getting data, your read from two different addrs!
+#define VEML6070_ADDR_H 0x39 ///< High address
+#define VEML6070_ADDR_L 0x38 ///< Low address
+
+
+/**************************************************************************/
+/*! 
+    @brief  integration time definitions
+*/
+/**************************************************************************/
+typedef enum veml6070_integrationtime {
+  VEML6070_HALF_T,
+  VEML6070_1_T,
+  VEML6070_2_T,
+  VEML6070_4_T,
+} veml6070_integrationtime_t;
+
 
 
 //""""  Teporocho 2.0 """"*/
@@ -66,7 +83,26 @@ class Feedback{
         float computeHeatIndex(float temperature, float percentHumidity, bool isFahrenheit=true);
         float readHumidity(bool force=false);
         boolean read(bool force=false);
-    private:
+        void begin(veml6070_integrationtime_t itime, TwoWire *twoWire = &Wire);
+        uint16_t readUV(void);
+        void sleep(bool state);
+        
+        private:
+        TwoWire *_i2c;
+
+        typedef union {
+            struct {
+            uint8_t SD:1;
+            uint8_t :1;
+            uint8_t IT:2;
+            uint8_t ACK_THD:1;
+            uint8_t ACK:1;
+            } bit;
+            uint8_t reg;
+
+        } commandRegister;
+
+        commandRegister _commandRegister;
         Adafruit_LIS3DH _lis[4];
         float _suspensionsAngle[7];
         float _radsPerChange = 0.0523;

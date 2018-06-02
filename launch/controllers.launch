@@ -4,8 +4,8 @@
         <param name="dev" type="string" value="/dev/input/js1" />
     </node>
 
-    <!-- Mad Catz Controller -->
+    <!-- Mad Catz Controller 
     <node pkg = "joy" type = "joy_node" name = "joy" ns= "joy_MCJ">
         <param name="dev" type="string" value="/dev/input/js2" />
-    </node>
+    </node> -->
 </launch>   
